@@ -13,4 +13,23 @@ class Const:
         if not isinstance(row,int):
             raise ValueError("row must be an integer")
         if row<0 or row >=Const.ROWS:
-            
+            raise ValueError("row ("+str(row)+") must be between 0 and " +str(Const.ROWS-1))
+   
+    def colOk(col):
+        if not isinstance(col, int):
+            raise ValueError("col must be an integer")
+        if col<0 or col >=Const.COLS:
+            raise ValueError("col ("+str(col)+") must be between 0 and " +str(Const.COLs-1))
+
+    def markOk(mark):
+        if not isinstance(mark, int):
+            raise ValueError("Mark must be an integer")
+        if mark != Const.MARK_NONE and mark != Const.MARK_O and mark != Const.MARK_X:
+            raise ValueError("mark (" +str(mark)+") must be NONE O or X")
+    def stateOK(state):
+        if not isinstance(state, int):
+            raise ValueError("state must be an integer")
+        if (state != Const.STATE_TURN_X) and (state != Const.STATE_TURN_O) and \
+           (state != Const.STATE_WIN_O) and (state != Const.STATE_WIN_X) and \
+           (state != Const.STATE_DRAW):
+                raise ValueError("state ("+str(state)+") must be either a turn, win, or draw")
