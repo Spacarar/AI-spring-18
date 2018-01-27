@@ -37,3 +37,15 @@ class GamePlay:
         while not game.over():
             self.turn()
         print(Const.stateStr(game.getState()))
+    def playVS(self,userSide):
+        game=self.getGame()
+        while not game.over():
+            if game.xTurn() and userSide==Const.MARK_X:
+                print("user: ")
+                Move.play(Move.parse(input()),game)
+            elif game.oTurn() and userSide==Const.MARK_O:
+                print("user: ")
+                Move.play(Move.parse(input()),game)
+            else:
+                self.turn()
+            print(Const.stateStr(game.getState()))
