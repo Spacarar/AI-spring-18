@@ -2,7 +2,7 @@ from Const import Const
  
 class Move:
     def __init__(self,row,col,mark):
-        Const.rowOK(row)
+        Const.rowOk(row)
         Const.colOk(col)
         if mark!= None: Const.markOk(mark)
         self._row =row
@@ -27,6 +27,18 @@ class Move:
         col = ord(str[i+1])-ord('1')
         return Move(row,col,mark)
 
+    def __str__(self):
+        if self._mark == None:
+            mark=''
+        elif self._mark == Const.MARK_X:
+            mark='x'
+        elif self._mark == Const.MARK_O:
+            mark='o'
+        else:
+            mark='?'
+        return mark + chr(ord('a')+self._row)+chr(ord('1')+self._col)
+
+
     def play(self,state):
         mark = self._mark
         if mark ==None:
@@ -36,5 +48,5 @@ class Move:
                 mark = Const.MARK_O
         state.move(self._row,self._col,mark)
 
-    def undo(self, state):
+    def unplay(self, state):
         state.unmove(self._row, self._col)

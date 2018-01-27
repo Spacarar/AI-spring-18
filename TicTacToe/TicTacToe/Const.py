@@ -9,7 +9,9 @@ class Const:
     STATE_WIN_O=3
     STATE_WIN_X=4
     STATE_DRAW=5
-    def rowOK(row):
+
+
+    def rowOk(row):
         if not isinstance(row,int):
             raise ValueError("row must be an integer")
         if row<0 or row >=Const.ROWS:
@@ -33,3 +35,16 @@ class Const:
            (state != Const.STATE_WIN_O) and (state != Const.STATE_WIN_X) and \
            (state != Const.STATE_DRAW):
                 raise ValueError("state ("+str(state)+") must be either a turn, win, or draw")
+    def stateStr(state):
+        if state == Const.STATE_TURN_O: return "o's turn"
+        if state == Const.STATE_TURN_X: return "x's turn"
+        if state == Const.STATE_WIN_O: return "o won"
+        if state == Const.STATE_WIN_X: return "x won"
+        if state == Const.STATE_DRAW: return "draw"
+        return "unknown state (" + str(state) + ")"
+
+    def markStr(mark):
+        if mark == Const.MARK_O: return "o"
+        if mark == Const.MARK_X: return "x"
+        if mark == Const.MARK_NONE: return " "
+        return "unkown mark (" + str(mark) + ")"
