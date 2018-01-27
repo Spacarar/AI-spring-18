@@ -46,6 +46,8 @@ class BasicAgent:
                     ans = min(ans,moveValue)
         return (ans,myOptions)
     def move(self,game):
+        if game.isEmptyBoard():
+            return Move(random.randint(0,Const.ROWS-1),random.randint(0,Const.COLS-1),self.side)
         (maxValue,maxOptions)=self.value(game)
         playable = []
         maxPlayableOption =0

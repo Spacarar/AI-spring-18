@@ -117,6 +117,14 @@ class Game:
 
     def getBoard(self):
         return [[self._board[row][col]  for col in range(Const.COLS)] for row in range(Const.ROWS)]
+
+    def isEmptyBoard(self):
+        for col in range(Const.COLS):
+            for row in range(Const.ROWS):
+                if self._board[row][col]==Const.MARK_O or self._board[row][col]==Const.MARK_X:
+                    return False
+        return True
+
         
     def getState(self):
         return self._state
