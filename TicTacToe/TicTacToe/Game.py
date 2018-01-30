@@ -1,7 +1,9 @@
 from Const import Const
 from Move import Move
+import os
 
 class Game:
+    abc ="abcd"
     def over(self):
         return \
             self._state == Const.STATE_WIN_O or \
@@ -47,12 +49,16 @@ class Game:
         return self._repeats(row,col,rowDir,colDir)+self._repeats(row,col,-rowDir,-colDir)-1
 
     def _winRow(self,row,col):
+        #print("win row")
         return self._length(row,col,1,0) >= 3
     def _winCol(self,row,col):
+        #print("win col")
         return self._length(row,col,0,1) >= 3
     def _winMainDiag(self,row,col):
+        #print("win main diag")
         return self._length(row,col,1,1) >= 3
     def _winOffDiag(self,row,col):
+        #print("win off diag")
         return self._length(row,col,1,-1) >= 3
 
     def _win(self,row,col):
@@ -124,7 +130,21 @@ class Game:
                 if self._board[row][col]==Const.MARK_O or self._board[row][col]==Const.MARK_X:
                     return False
         return True
-
+    def printBoard(self):
+       # os.system("cls")
+        print()
+        board = self.getBoard()
+        print("    1  2  3 ")
+        for row in range(Const.ROWS):
+            print("%s:  " %self.abc[row], end='')
+            for col in range(Const.COLS):
+                print(Const.PRINT_X_O[board[row][col]], "", end='')
+                if col<Const.COLS-1:
+                    print("|",end="")
+            print()
+            if row <Const.ROWS-1:
+                print("   ---------")
+        print()
         
     def getState(self):
         return self._state

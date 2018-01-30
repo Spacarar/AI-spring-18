@@ -1,6 +1,6 @@
 class Const:
-    ROWS=3
-    COLS = 3
+    ROWS=4
+    COLS = 4
     MARK_NONE = 0
     MARK_O =1
     MARK_X =2
@@ -9,6 +9,7 @@ class Const:
     STATE_WIN_O=3
     STATE_WIN_X=4
     STATE_DRAW=5
+    PRINT_X_O ={MARK_NONE:' ', MARK_O: 'O', MARK_X:'X'}
 
 
     def rowOk(row):

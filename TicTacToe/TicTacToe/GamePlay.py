@@ -37,6 +37,7 @@ class GamePlay:
         while not game.over():
             self.turn()
         print(Const.stateStr(game.getState()))
+        game.printBoard()
     def playVS(self,userSide):
         game=self.getGame()
         while not game.over():
@@ -49,3 +50,4 @@ class GamePlay:
             else:
                 self.turn()
             print(Const.stateStr(game.getState()))
+            game.printBoard()
