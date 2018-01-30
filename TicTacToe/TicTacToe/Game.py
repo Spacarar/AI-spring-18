@@ -134,7 +134,9 @@ class Game:
        # os.system("cls")
         print()
         board = self.getBoard()
-        print("    1  2  3 ")
+        numString ="    "
+        for col in range(Const.COLS): numString +=str(col+1)+"  "
+        print(numString)
         for row in range(Const.ROWS):
             print("%s:  " %self.abc[row], end='')
             for col in range(Const.COLS):
