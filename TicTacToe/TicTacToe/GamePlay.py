@@ -20,6 +20,10 @@ class GamePlay:
         if self._agentX==None:
             self._agentX=self.createAgentX()
         return self._agentX
+
+    def setAgentX(self,agX):self._agentX=agX
+    def setAgentO(self,agO):self._agentO=agO
+
     def turn(self):
         game= self.getGame()
         if game.oTurn():
@@ -40,14 +44,24 @@ class GamePlay:
         game.printBoard()
     def playVS(self,userSide):
         game=self.getGame()
+        strMove=""
         while not game.over():
-            if game.xTurn() and userSide==Const.MARK_X:
-                print("user: ")
-                Move.play(Move.parse(input()),game)
-            elif game.oTurn() and userSide==Const.MARK_O:
-                print("user: ")
-                Move.play(Move.parse(input()),game)
-            else:
-                self.turn()
-            print(Const.stateStr(game.getState()))
             game.printBoard()
+            if (game.xTurn() and userSide==Const.MARK_X) or \
+            (game.oTurn() and userSide==Const.MARK_O):
+                while(not self.goodString(strMove)):
+                    strMove=input("user: ")
+                Move.play(Move.parse(strMove),game)
+                strMove=""
+            else:
+                print("AI TURN")
+                self.turn()
+            print("")
+            print(Const.stateStr(game.getState()))
+        game.printBoard()
+
+
+    def goodString(self, str):
+        if str=="" or str=="\n" or str ==" ":
+            return False
+        return True

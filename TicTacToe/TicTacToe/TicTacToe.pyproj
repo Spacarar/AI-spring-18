@@ -27,6 +27,18 @@
     <Compile Include="Const.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DepthLimitedAgent.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DepthVsBasic.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DepthVsDepth.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="HumanVsDepth.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="HumanvsWeighted.py">
       <SubType>Code</SubType>
     </Compile>

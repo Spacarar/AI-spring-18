@@ -9,7 +9,6 @@ class DepthVsDepthGamePlay(GamePlay):
     def createGame(self): return Game()
     def createAgentO(self): return DepthLimitedAgent(Const.MARK_O,1)
     def createAgentX(self): return DepthLimitedAgent(Const.MARK_X,4)
-
     def myAgentO(self,level):
         if level<=0:
             raise ValueError("level cannot be 0 or less")
@@ -22,17 +21,29 @@ class DepthVsDepthGamePlay(GamePlay):
         if level>5:
             print("high values may cause major slowdown")
         return DepthLimitedAgent(Const.MARK_X,level)
-
 if __name__=='__main__':
     gameplay= DepthVsDepthGamePlay()
-    levelX = 0
-    levelO = 0
-    print("set the recursion level of the players, higher values will be slower")
-    while(levelX<=0 and levelO<=0):
-        levelX=input("X recursion level: ")
-        levelO=input("O recursion Level: ")
-    gameplay.setAgentO(gameplay.myAgentO(levelO))
-    gameplay.setAgentX(gameplay.myAgentX(levelX))
-    gameplay.play()
+    userSide = Const.MARK_NONE
+    strSide=""
+    level = 0
+    print("Lets play TicTacToe")
+    while(userSide==Const.MARK_NONE):
+        strSide = input("pick a side (x or o): ")
+        if(strSide=="x"or strSide=="X"):
+            userSide=Const.MARK_X
+        elif(strSide=="o" or strSide=="O"):
+            userSide=Const.MARK_O
+        else: 
+            strSide=""
+            print("invalid side. (x or o)")
+    while(level<=0):
+        level = int(input("Recursion level (high values will be slower): "))
+    if(userSide==Const.MARK_O):
+        gameplay.setAgentX(gameplay.myAgentX(level))
+    else:
+        gameplay.setAgentO(gameplay.myAgentO(level))
+    gameplay.playVS(userSide)
     
+       
+        
 
