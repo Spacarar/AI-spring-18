@@ -47,19 +47,26 @@ class Game:
 
     def _length(self,row,col,rowDir,colDir):
         return self._repeats(row,col,rowDir,colDir)+self._repeats(row,col,-rowDir,-colDir)-1
+    
+    def countRow(self,row,col):return self._length(row,col,1,0)
+    def countCol(self,row,col):return self._length(row,col,0,1)
+    def countDiag(self,row,col):return self._length(row,col,1,1)
+    def countOffDiag(self,row,col):return self._length(row,col,1,-1)
+
+    def isEmptySpot(self,row,col):return self._board[row][col]==Const.MARK_NONE
 
     def _winRow(self,row,col):
         #print("win row")
-        return self._length(row,col,1,0) >= 3
+        return self._length(row,col,1,0) >= Const.WIN_VALUE
     def _winCol(self,row,col):
         #print("win col")
-        return self._length(row,col,0,1) >= 3
+        return self._length(row,col,0,1) >= Const.WIN_VALUE
     def _winMainDiag(self,row,col):
         #print("win main diag")
-        return self._length(row,col,1,1) >= 3
+        return self._length(row,col,1,1) >= Const.WIN_VALUE
     def _winOffDiag(self,row,col):
         #print("win off diag")
-        return self._length(row,col,1,-1) >= 3
+        return self._length(row,col,1,-1) >= Const.WIN_VALUE
 
     def _win(self,row,col):
         return self._winRow(row,col) or self._winCol(row,col) or \
@@ -67,6 +74,22 @@ class Game:
 
     def _draw(self):
         return self._unplayed == 0
+
+    def getXPositions(self):
+        moves=[]
+        for row in range(Const.ROWS):
+            for col in range(Const.COLS):
+                if(self._board[row][col]==Const.MARK_X):
+                    moves.append((row,col))
+        return moves
+
+    def getOPositions(self):
+        moves=[]
+        for row in range(Const.ROWS):
+            for col in range(Const.COLS):
+                if(self._board[row][col]==Const.MARK_O):
+                    moves.append((row,col))
+        return moves
 
     def getMoves(self):
         mark = None

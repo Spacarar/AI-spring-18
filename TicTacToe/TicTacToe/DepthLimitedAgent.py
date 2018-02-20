@@ -16,11 +16,11 @@ class DepthLimitedAgent:
         ans = None
         (moveValue,moveOptions)=(0,0)
         if game.oWon():
-            if self.side==Const.MARK_O: ans =level+1
-            else: ans=-level
+            if self.side==Const.MARK_O: ans =(level+1)+Const.WIN_VALUE
+            else: ans=(-level)-Const.WIN_VALUE
         elif game.xWon():
-            if self.side == Const.MARK_X: ans=level+1
-            else: ans =-level
+            if self.side == Const.MARK_X: ans=(level+1)+Const.WIN_VALUE
+            else: ans =(-level)-Const.WIN_VALUE
         elif game.draw():
             ans=0
         #if the answer was written, the game is in an ending state and ans is known
@@ -49,7 +49,7 @@ class DepthLimitedAgent:
                     ans=max(ans,moveValue)
                 else:
                     ans=min(ans,moveValue)
-
+        if ans==0:ans = self.weighBoard(game)
         return (ans,myOptions)
 
     def move(self,game):
@@ -72,6 +72,7 @@ class DepthLimitedAgent:
         for move in game.getMoves():
             move.play(game)
             (moveValue,moveOptions)=self.value(game, self.level)
+            print("testing: "+str(move)," value = "+str(moveValue)+"  options = "+str(moveOptions))
             move.unplay(game)
             valueList.append(moveValue)
             #had to subtract 1, if too high sometimes a better move than current state does not exist
@@ -87,21 +88,26 @@ class DepthLimitedAgent:
       
 
         for (move, options) in playable:
-            if options == maxPlayableOption:
+            if options >= maxPlayableOption:
                 bestPlayable.append(move)
         
         if len(bestPlayable)>0:
             spot=random.randint(0,len(bestPlayable)-1)
             print("i found a good spot")
+            for m in bestPlayable:
+             print("moves:  "+str(m))
             return bestPlayable[spot]
         
         elif len(playable)>0:
+            spot = random.randint(0,len(playable)-1)
             print("i found an alright spot")
-            return playable[0][0]
+            for m in playable:
+                print("possible: " +str(m))
+            return playable[spot][0]
         
         else:
-            print("No move will bring me to victory, you win")
-            return game.getMoves()[0]
+            print("No moves are better than right now,LOW WIN CHANCE")
+            return game.getMoves()[random.randint(0,len(game.getMoves())-1)]
     
     
     def nearbySpot(self, game,side):
@@ -125,4 +131,36 @@ class DepthLimitedAgent:
                 bestSpot=play
                 bestScore=playscore
         return Move(bestSpot[0],bestSpot[1],side)
-              
+
+    def weighBoard(self,game):
+        ans=0
+        enemyPositions=[]
+        selfPositions=[]
+        if game.isEmptyBoard(): return 0
+        if(self.side==Const.MARK_O):
+            enemyPositions=game.getXPositions()
+            selfPositions=game.getOPositions()
+        elif(self.side==Const.MARK_X):
+            enemyPositions=game.getOPositions()
+            selfPositions=game.getXPositions()
+        else:raise valueError("Agent must have side")
+        
+        for ePos in enemyPositions:
+            if(game.countRow(ePos[0],ePos[1])>=Const.WIN_VALUE-1):
+               ans-=game.countRow(ePos[0],ePos[1])
+            elif(game.countCol(ePos[0],ePos[1])>=Const.WIN_VALUE-1):
+                ans-=game.countCol(ePos[0],ePos[1])
+            elif(game.countDiag(ePos[0],ePos[1])>=Const.WIN_VALUE-1):
+                ans-=game.countDiag(ePos[0],ePos[1])
+            elif(game.countOffDiag(ePos[0],ePos[1])>=Const.WIN_VALUE-1):
+                ans-=game.countOffDiag(ePos[0],ePos[1])
+        for sPos in selfPositions:
+            if(game.countRow(sPos[0],sPos[1])>=Const.WIN_VALUE-1):
+               ans+=game.countRow(sPos[0],sPos[1])
+            elif(game.countCol(sPos[0],sPos[1])>=Const.WIN_VALUE-1):
+                ans+=game.countCol(sPos[0],sPos[1])
+            elif(game.countDiag(sPos[0],sPos[1])>=Const.WIN_VALUE-1):
+                ans+=game.countDiag(sPos[0],sPos[1])
+            elif(game.countOffDiag(sPos[0],sPos[1])>=Const.WIN_VALUE-1):
+                ans+=game.countOffDiag(sPos[0],sPos[1])
+        return ans

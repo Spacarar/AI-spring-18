@@ -1,6 +1,7 @@
 class Const:
     ROWS=4
     COLS = 4
+    WIN_VALUE=4
     MARK_NONE = 0
     MARK_O =1
     MARK_X =2

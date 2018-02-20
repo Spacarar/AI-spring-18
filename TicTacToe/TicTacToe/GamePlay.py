@@ -40,6 +40,7 @@ class GamePlay:
         game = self.getGame()
         while not game.over():
             self.turn()
+            game.printBoard()
         print(Const.stateStr(game.getState()))
         game.printBoard()
     def playVS(self,userSide):
