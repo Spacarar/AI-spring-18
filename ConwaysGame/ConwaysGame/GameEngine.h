@@ -17,7 +17,7 @@ const int SCR_WIDTH = 1080;
 const int SCR_HEIGHT = 720;
 const int PSIZE = 10;
 const int MILLIS_PER_SEC = 1000;
-const int FPS = 2;
+const int FPS = 8;
 
 bool isRunning = true;
 
@@ -136,10 +136,9 @@ void GameEngine::draw() {
 	grid.drawGrid(ren);
 	SDL_RenderPresent(ren);
 }
-
 //fps limitation and update limitation (useful to look at)
 bool GameEngine::updateRequired() {
-	if (std::chrono::duration_cast<std::chrono::milliseconds>(mClock::now() - lUpdate).count() >= (long long)(MILLIS_PER_SEC / FPS)) {
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(mClock::now() - lUpdate).count() >= (long long)(MILLIS_PER_SEC / (FPS+1))) {
 		//printf("DIFFERENCE: %d \n NEEDED: %d\n", std::chrono::duration_cast<std::chrono::milliseconds>(mClock::now() - lUpdate).count(), (long long)(MILLIS_PER_SEC / FPS));
 		lUpdate = mClock::now();
 		return true;
@@ -194,5 +193,12 @@ void GameEngine::quit() {
 }
 
 void GameEngine::handleEvent(SDL_Event e) {
-
+	static int mouseX;
+	static int mouseY;
+	if (e.type == SDL_MOUSEBUTTONDOWN) {
+		SDL_GetMouseState(&mouseX, &mouseY);
+		if (e.button.button == SDL_BUTTON_RIGHT) {
+			grid.drawGlider(mouseX, mouseY);
+		}
+	}
 }
