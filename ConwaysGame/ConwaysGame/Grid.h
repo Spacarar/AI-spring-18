@@ -16,23 +16,10 @@ class Grid {
 private:
 	SDL_Rect blackRect;
 	Pixel pixel[GRIDSIZE][GRIDSIZE];
-	//safer pixel returning function
-	Pixel pix(int x, int y) {
-		int ogx;
-		int ogy;
-		if (x < 0)
-			ogx = ((abs(x) - 1) % GRIDSIZE);
-		else if (x >= GRIDSIZE)
-			ogx = (x%GRIDSIZE);
-		else
-			ogx = x;
-		if (y < 0)
-			ogy = ((abs(y) - 1) % GRIDSIZE);
-		else if (y >= GRIDSIZE)
-			ogy = (y%GRIDSIZE);
-		else
-			ogy = y;
-		return pixel[ogx][ogy];
+	//returns an assured safe range (used to loop around grid edges)
+	int safeN(int n) {
+		if (n < 0)return(GRIDSIZE - ((abs(n)) % GRIDSIZE));
+		else return n%GRIDSIZE;
 	}
 	int pSize;
 public:
@@ -75,10 +62,12 @@ public:
 	}
 
 	void turnOnPixel(int x, int y) {
-		pix(x, y).born();
+		pixel[safeN(x)][safeN(y)].born();
 	}
 
 	void drawGlider(int offX, int offY) {
+		offX = (offX) % (GRIDSIZE*pSize);
+		offY = (offY) % (GRIDSIZE*pSize);
 		turnOnPixel(offX + 1, offY);
 		turnOnPixel(offX + 2, offY + 1);
 		turnOnPixel(offX, offY + 2);
@@ -119,14 +108,14 @@ public:
 
 	int neighbors(int x, int y) {
 		int ee = 0;
-		if (pix(x - 1, y).isAlive())ee++;
-		if (pix(x - 1, y - 1).isAlive())ee++;
-		if (pix(x - 1, y + 1).isAlive())ee++;
-		if (pix(x + 1, y).isAlive())ee++;
-		if (pix(x + 1, y - 1).isAlive())ee++;
-		if (pix(x + 1, y + 1).isAlive())ee++;
-		if (pix(x, y - 1).isAlive())ee++;
-		if (pix(x, y + 1).isAlive())ee++;
+		if (pixel[safeN(x - 1)][safeN(y)].isAlive())ee++;
+		if (pixel[safeN(x - 1)][safeN(y - 1)].isAlive())ee++;
+		if (pixel[safeN(x - 1)][safeN(y + 1)].isAlive())ee++;
+		if (pixel[safeN(x + 1)][safeN(y)].isAlive())ee++;
+		if (pixel[safeN(x + 1)][safeN(y - 1)].isAlive())ee++;
+		if (pixel[safeN(x + 1)][safeN(y + 1)].isAlive())ee++;
+		if (pixel[safeN(x)][safeN(y - 1)].isAlive())ee++;
+		if (pixel[safeN(x)][safeN(y + 1)].isAlive())ee++;
 		return ee;
 	}
 
@@ -139,6 +128,11 @@ public:
 			}
 		}
 	}
-
+	void testSafeN() {
+		for (int i = -4; i < GRIDSIZE + 5; i++) {
+			printf("%d=%d", i, safeN(i));
+			std::cin.get();
+		}
+	}
 };
 
