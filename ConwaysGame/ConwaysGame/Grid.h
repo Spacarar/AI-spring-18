@@ -1,17 +1,21 @@
 #pragma once
 #include "stdafx.h"
+
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
+
 #include<iostream>
 #include<string>
 #include<math.h>
+#include<vector>
+
 #include "Pixel.h"
 
 const int GRIDSIZE = 50;
 
-
+using namespace std;
 class Grid {
 private:
 	SDL_Rect blackRect;
@@ -48,7 +52,7 @@ public:
 			}
 		}
 	}
-
+	
 	void drawGrid(SDL_Renderer *ren) {
 		SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
 		SDL_RenderFillRect(ren, &blackRect);
@@ -63,6 +67,12 @@ public:
 
 	void turnOnPixel(int x, int y) {
 		pixel[safeN(x)][safeN(y)].born();
+		pixel[safeN(x)][safeN(y)].update();
+	}
+	void turnOnPixel(std::vector<std::pair<int, int>> cordList) {
+		for (int i = 0; i < cordList.size(); i++) {
+			turnOnPixel(cordList[i].first, cordList[i].second);
+		}
 	}
 
 	void drawGlider(int offX, int offY) {
@@ -119,15 +129,59 @@ public:
 		return ee;
 	}
 
-	std::string me() {
+	string me() {
 		std::string representation = "";
 		for (int x = 0; x < GRIDSIZE; x++) {
 			for (int y = 0; y < GRIDSIZE; y++) {
-				if (pixel[x][y].isAlive())representation += '1';
-				else representation += '0';
+				if (pixel[x][y].isAlive())representation.append(to_string(x)+","+to_string(y)+"|");
+				//else representation.append("0");
+			}
+		}
+		//cout << representation << endl;
+		//unsigned char* rp = new unsigned char[representation.size()];
+		//for (int i = 0; i > representation.size(); i++) {
+			//rp[i] = representation[i];
+		//}
+		return representation;
+	}
+	bool isEmpty() {
+		for (int x = 0; x < GRIDSIZE; x++) {
+			for(int y=0;y<GRIDSIZE;y++){
+				if (pixel[x][y].isAlive()) return false;
+			}
+		}
+		return true;
+	}
+	int liveValue() {
+		int count = 0;
+		for (int x = 0; x < GRIDSIZE; x++) {
+			for (int y = 0; y<GRIDSIZE; y++) {
+				if (pixel[x][y].isAlive()) {
+					//cout << "pixel(" << x << "," << y << ") is alive" << endl;
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+	void clear() {
+		for (int x = 0; x < GRIDSIZE; x++) {
+			for (int y = 0; y < GRIDSIZE; y++) {
+				pixel[x][y].kill();
+				pixel[x][y].update();
 			}
 		}
 	}
+	vector<pair<int, int> > getCoords() {
+		vector<pair<int, int> > coords;
+		for (int x = 0; x < GRIDSIZE; x++) {
+			for (int y = 0; y < GRIDSIZE; y++) {
+				if (pixel[x][y].isAlive())coords.push_back(make_pair(x, y));
+			}
+		}
+		return coords;
+	}
+
 	void testSafeN() {
 		for (int i = -4; i < GRIDSIZE + 5; i++) {
 			printf("%d=%d", i, safeN(i));

@@ -8,16 +8,16 @@
 #include<chrono>
 #include "Pixel.h"
 #include "Grid.h"
+#include "GridPlayer.h"
 typedef std::chrono::steady_clock mClock; 
 
 
 //using namespace std;
-
-const int SCR_WIDTH = 1080;
-const int SCR_HEIGHT = 720;
-const int PSIZE = 10;
+const int PSIZE = 14;
+const int SCR_WIDTH = PSIZE*GRIDSIZE;
+const int SCR_HEIGHT = PSIZE*GRIDSIZE;
 const int MILLIS_PER_SEC = 1000;
-const int FPS = 8;
+const int FPS = 5;
 
 bool isRunning = true;
 
@@ -35,6 +35,7 @@ class GameEngine {
 
 	//MY STUFF
 	Grid grid;
+	GridPlayer gPlayer;
 	void init();
 	void initSDL();
 	void update();
@@ -81,10 +82,9 @@ public:
 		initSDL();
 		totalFrames = 0;
 		grid = Grid(SCR_WIDTH, SCR_HEIGHT, PSIZE);
-		grid.turnOnPixel(1, 0);
-		grid.turnOnPixel(1, 1);
-		grid.turnOnPixel(1, 2);
-		grid.drawGlider(500, 500);
+		gPlayer = GridPlayer(100, 75);
+		gPlayer.start();
+		grid.turnOnPixel(gPlayer.nextLivingFound());
 		sTime = lUpdate = lDraw = mClock::now();
 	}
 
@@ -198,7 +198,9 @@ void GameEngine::handleEvent(SDL_Event e) {
 	if (e.type == SDL_MOUSEBUTTONDOWN) {
 		SDL_GetMouseState(&mouseX, &mouseY);
 		if (e.button.button == SDL_BUTTON_RIGHT) {
-			grid.drawGlider(mouseX, mouseY);
+			grid.clear();
+			grid.turnOnPixel(gPlayer.nextLivingFound());
+			//grid.drawGlider(mouseX, mouseY);
 		}
 	}
 }
