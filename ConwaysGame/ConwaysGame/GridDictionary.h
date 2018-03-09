@@ -10,9 +10,9 @@ typedef enum UpdateState {LIVING,DEAD,OSCILLATING,STAGNANT,FAILED} UpdateState;
 class GameRecord {
 	
 	//count the repititions in the oscillating string array
-	void countOsc(string me) {
+	void countOsc(size_t me) {
 		repeatedView = 0;
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 5; i++) {
 			if (me == oscillationRecord[i]) {
 				//cout << me << "==" << oscillationRecord[i] << endl;
 				repeatedView++;
@@ -24,8 +24,8 @@ class GameRecord {
 	bool stagnantCheck(int lValue) {
 		int count = 0;
 		//int startingP;
-		//liveValues.size() < 15 ? startingP = 0 : startingP = liveValues.size() - 14;
-		for (int i = 0; i < 20; i++) {
+		//liveValues.size() < 5 ? startingP = 0 : startingP = liveValues.size() - 14;
+		for (int i = 0; i < 5; i++) {
 			if (lValue == liveValues[i])count++;
 		}
 		return count > 7;
@@ -34,17 +34,17 @@ class GameRecord {
 public:
 	vector < pair<int, int> > startCoords;
 	UpdateState lastState;
-	int liveValues[20];
+	int liveValues[5];
 	//FIXME add a running average a=(1-p)(last a) +(p)(liveValue); p=1/99 for 99 elements
-	string oscillationRecord[20]; //string record of last 20 grids, kept to check for cycles
+	size_t oscillationRecord[5]; //string record of last 5 grids, kept to check for cycles
 	unsigned int currOsc; //current index to be inserted for oscillation check
 	int repeatedView; //the number of repeated grids seen
 	int deathCycle; //the cycle the pattern was determined to have "stopped"
 	GameRecord() {
 		lastState = LIVING;
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 5; i++) {
 			liveValues[i] = 0;
-			oscillationRecord[i] = "NULL";
+			oscillationRecord[i] = 0;
 		}
 		startCoords.clear();
 		currOsc = 0;
@@ -56,7 +56,7 @@ public:
 		liveValues[currOsc] = g.liveValue();
 		countOsc(g.me());
 		oscillationRecord[currOsc] = g.me();
-		currOsc = (currOsc + 1) % 20;
+		currOsc = (currOsc + 1) % 5;
 		if (g.liveValue() == 0) {
 			deathCycle = cycle;
 			lastState = DEAD;
@@ -67,11 +67,11 @@ public:
 			deathCycle = cycle;
 			return OSCILLATING;
 		}
-		else if (stagnantCheck(g.liveValue())) {
-			lastState = STAGNANT;
-			deathCycle = cycle;
-			return STAGNANT;
-		}
+		//else if (stagnantCheck(g.liveValue())) {
+			//lastState = STAGNANT;
+			//deathCycle = cycle;
+			//return STAGNANT;
+		//}
 		else {
 			lastState = LIVING;
 			return LIVING;
@@ -92,14 +92,14 @@ private:
 
 
 public:
-	map<string, GameRecord> gridDict;
+	map<size_t, GameRecord> gridDict;
 	GridDictionary(int interval=1) {
 		interval > 0 ? check_interval = interval : check_interval = 1;
 		gridDict.clear();
 		Grid emptyG = Grid();
 		update(emptyG.me(), emptyG,0);
 	}
-	UpdateState stateOf(string me) {
+	UpdateState stateOf(size_t me) {
 		if (gridDict.count(me) > 0) {
 			return gridDict[me].lastState;
 		}
@@ -110,18 +110,18 @@ public:
 		
 	}
 
-	bool exists(string me) {
+	bool exists(size_t me) {
 		return gridDict.count(me);
 	}
 
-	bool cDeathFound(string me) {
+	bool cDeathFound(size_t me) {
 		if (gridDict.count(me) > 0) {
 			return (gridDict[me].deathCycle != -1);
 		}
 		return false;
 	}
 
-	UpdateState update(string me, Grid &g,int cycle) {
+	UpdateState update(size_t me, Grid &g,int cycle) {
 		if (gridDict.count(me) > 0) {
 			return gridDict[me].update(g,cycle);
 		}
@@ -134,7 +134,7 @@ public:
 			else return FAILED;
 		}
 	}
-	GameRecord record(string me) {
+	GameRecord record(size_t me) {
 		if (gridDict.count(me) > 0) {
 			return gridDict[me];
 		}
@@ -146,7 +146,7 @@ public:
 
 	int deadCount() {
 		int c = 0;
-		map<string, GameRecord>::const_iterator it;
+		map<size_t, GameRecord>::const_iterator it;
 		for (it = gridDict.begin(); it != gridDict.end(); ++it) {
 			if(it->second.lastState==DEAD)c++;
 		}
@@ -154,18 +154,18 @@ public:
 	}
 	int liveCount() {
 		int c = 0;
-		map<string, GameRecord>::const_iterator it;
+		map<size_t, GameRecord>::const_iterator it;
 		for (it = gridDict.begin(); it != gridDict.end(); ++it) {
 			if (it->second.lastState == LIVING)c++;
 		}
 		return c;
 	}
 	int totalCount() {
-		return gridDict.size();
+		return int(gridDict.size());
 	}
 	int oscCount() {
 		int c = 0;
-		map<string, GameRecord>::const_iterator it;
+		map<size_t, GameRecord>::const_iterator it;
 		for (it = gridDict.begin(); it != gridDict.end(); ++it) {
 			if (it->second.lastState == OSCILLATING)c++;
 		}
@@ -173,7 +173,7 @@ public:
 	}
 	int stagCount() {
 		int c = 0;
-		map<string, GameRecord>::const_iterator it;
+		map<size_t, GameRecord>::const_iterator it;
 		for (it = gridDict.begin(); it != gridDict.end(); ++it) {
 			if (it->second.lastState == STAGNANT)c++;
 		}

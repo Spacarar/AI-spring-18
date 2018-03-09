@@ -13,7 +13,7 @@
 
 #include "Pixel.h"
 
-const int GRIDSIZE = 50;
+const int GRIDSIZE = 100;
 
 using namespace std;
 class Grid {
@@ -129,8 +129,10 @@ public:
 		return ee;
 	}
 
-	string me() {
-		std::string representation = "";
+	size_t me() {
+		static std::string representation = "";
+		std::hash<string> hashThis;
+		representation.clear();
 		for (int x = 0; x < GRIDSIZE; x++) {
 			for (int y = 0; y < GRIDSIZE; y++) {
 				if (pixel[x][y].isAlive())representation.append(to_string(x)+","+to_string(y)+"|");
@@ -142,7 +144,7 @@ public:
 		//for (int i = 0; i > representation.size(); i++) {
 			//rp[i] = representation[i];
 		//}
-		return representation;
+		return hashThis(representation);
 	}
 	bool isEmpty() {
 		for (int x = 0; x < GRIDSIZE; x++) {

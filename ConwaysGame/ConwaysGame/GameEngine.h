@@ -5,7 +5,7 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
-#include<chrono>
+#include <chrono>
 #include "Pixel.h"
 #include "Grid.h"
 #include "GridPlayer.h"
@@ -13,7 +13,7 @@ typedef std::chrono::steady_clock mClock;
 
 
 //using namespace std;
-const int PSIZE = 14;
+const int PSIZE = 7;
 const int SCR_WIDTH = PSIZE*GRIDSIZE;
 const int SCR_HEIGHT = PSIZE*GRIDSIZE;
 const int MILLIS_PER_SEC = 1000;
@@ -79,13 +79,15 @@ class GameEngine {
 
 public:
 	GameEngine() {
-		initSDL();
 		totalFrames = 0;
 		grid = Grid(SCR_WIDTH, SCR_HEIGHT, PSIZE);
-		gPlayer = GridPlayer(100, 75);
+		gPlayer = GridPlayer(100, 30);
+		sTime = mClock::now();
 		gPlayer.start();
+		printf("Time(seconds): %lld", ((std::chrono::duration_cast<std::chrono::milliseconds>(mClock::now() - sTime).count())) / 1000);
 		grid.turnOnPixel(gPlayer.nextLivingFound());
 		sTime = lUpdate = lDraw = mClock::now();
+		initSDL();
 	}
 
 	void run();

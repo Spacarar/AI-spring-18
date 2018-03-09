@@ -4,8 +4,8 @@
 #include<random>
 #include<fstream>
 
-const int CLEANRUNS = 16; //number of times it will clean up dictionary
-const int PICKRUNS = 500; //evaluations between cleanups 
+const int CLEANRUNS = 4; //number of times it will clean up dictionary
+const int PICKRUNS = 50; //evaluations between cleanups 
 
 
 class GridPlayer {
@@ -20,14 +20,14 @@ class GridPlayer {
 	int liveChecked;
 public:
 	GridPlayer() {
-		srand(time(NULL));
+		srand(unsigned int(time(NULL)));
 		cycles = 10;
 		pieces = 1;
 		grid = Grid();
 		gd = GridDictionary();
 	}
 	GridPlayer(int cyc, int pie) {
-		srand(time(NULL));
+		srand(unsigned int(time(NULL)));
 		cycles = cyc;
 		pieces = pie;
 		grid = Grid();
@@ -52,9 +52,13 @@ public:
 		for (int c = 0; c < CLEANRUNS; c++) {
 			for (int i = 0; i < PICKRUNS; i++) {
 				//cout << endl << "Begin Evaluation:";
-				if(c%4==0||c==0)pickPieces();
-				else(pickMutation());
-				string me = grid.me();
+				if(c==0||c%4==0)pickPieces();
+				else {
+					if (rand() % 20 == 0)pickUnion();
+					else pickMutation();
+
+				}
+				size_t me = grid.me();
 				for (int i = 0; i < cycles; i++) {
 					gd.update(me, grid, i);
 					switch (gd.stateOf(me)) {
@@ -94,7 +98,7 @@ public:
 			}
 			//cout << "D: " << deadChecked << "  O: " << oscChecked << " S: " << stagChecked << " L: " << liveChecked << endl;
 			//printf("Final Count: %d  D:%d  O:%d  S:%d  L:%d\n", gd.totalCount(), gd.deadCount(), gd.oscCount(), gd.stagCount(), gd.liveCount());
-			cout << "Cleaning : " << gd.gridDict.size();
+			cout << "Cleaning ("<<c+1<<"): " << gd.gridDict.size();
 			cleanupDictionary(c+1);
 			cout << " Now: " << gd.gridDict.size() << endl;
 			printf("Final Count: %d  D:%d  O:%d  S:%d  L:%d\n", gd.totalCount(), gd.deadCount(), gd.oscCount(), gd.stagCount(), gd.liveCount());
@@ -109,7 +113,7 @@ public:
 		int looped = 0;
 		while (looped<3) {
 			c = 0;
-			for (map<string, GameRecord>::iterator it = gd.gridDict.begin(); it != gd.gridDict.end(); ++it) {
+			for (map<size_t, GameRecord>::iterator it = gd.gridDict.begin(); it != gd.gridDict.end(); ++it) {
 				if (it->second.lastState == LIVING) {
 					if (displayIt < c) {
 						displayIt = c;
@@ -125,7 +129,7 @@ public:
 		return none;
 	}
 	void exportLiving() {
-		map<string, GameRecord>::iterator it;
+		map<size_t, GameRecord>::iterator it;
 		ofstream fout;
 		fout.open("LivingExport.txt");
 		for (it = gd.gridDict.begin(); it != gd.gridDict.end(); ++it) {
@@ -135,24 +139,49 @@ public:
 	}
 	void pickPieces() {
 		int tX, tY;
+		int dX, dY;
 		vector<pair<int, int> > chosenCoords;
 		grid.clear();
 		while (gd.exists(grid.me())) {
+			tX = rand() % GRIDSIZE;
+			tY = rand() % GRIDSIZE;
 			grid.clear();
 			for (int i = 0; i < pieces; i++) {
-				tX = rand() % GRIDSIZE;
-				tY = rand() % GRIDSIZE;
-				chosenCoords.push_back(make_pair(tX, tY));
+				//place a piece +- i distance away
+				dX = (rand() % 3 - 1)*(rand() % (int(i/2) + 1));
+				dY = (rand() % 3 - 1)*(rand() % (int(i/2) + 1));
+				chosenCoords.push_back(make_pair(tX+dX, tY+dY));
 			}
 			grid.turnOnPixel(chosenCoords);
 		}
 	
 	}
+	void pickUnion() {
+		grid.clear();
+		int chosen1;
+		int chosen2;
+		map<size_t, GameRecord>::iterator it1;
+		map<size_t, GameRecord>::iterator it2;
+		while (gd.exists(grid.me())) {
+			chosen1 = rand() % gd.gridDict.size();
+			chosen2 = rand() % gd.gridDict.size();
+			it1 = gd.gridDict.begin();
+			it2 = gd.gridDict.begin();
+			//cout << "picking union " << endl;
+			vector<pair<int, int> > chosenCoords;
+			for (int i = 0; i < chosen1; i++)++it1;
+			for (int i = 0; i < chosen2; i++)it2++;
+			chosenCoords.insert(chosenCoords.end(), it1->second.startCoords.begin(), it1->second.startCoords.end());
+			chosenCoords.insert(chosenCoords.end(), it2->second.startCoords.begin(), it2->second.startCoords.end());
+			grid.clear();
+			grid.turnOnPixel(chosenCoords);
+		}
 
+	}
 	void pickMutation() {
 		int chosen = rand() % gd.gridDict.size();
 		grid.clear();
-		map<string, GameRecord>::iterator it = gd.gridDict.begin();
+		map<size_t, GameRecord>::iterator it = gd.gridDict.begin();
 		for (int i = 0; i < chosen; i++)++it;
 		int tries = 0;
 		while (gd.exists(grid.me())) {
@@ -170,7 +199,7 @@ public:
 	}
 
 	void cleanupDictionary(int lowLimit) {
-		map<string, GameRecord>::iterator it;
+		map<size_t, GameRecord>::iterator it;
 		for (it = gd.gridDict.begin(); it != gd.gridDict.end()&&gd.gridDict.size()>10; ++it) {
 			//lasted too short of a period.
 			if (it->second.deathCycle>0 && it->second.deathCycle < lowLimit &&it->second.lastState!=LIVING) {
@@ -183,18 +212,21 @@ public:
 
 	vector<pair<int, int> >  mutation(vector<pair<int, int> > og) {
 		int randDirection = 0;
+		int randDistance = 0;
 		vector<pair<int, int> > newPieces;
+		vector<pair<int, int> > finalPieces;
 		for (int i = 0; i < og.size(); i++) {
-			if (rand() % 100 < 20) {
+			if (rand() % 100 < 40) {
 				randDirection = rand() % 80 + 1;
-				if (randDirection <= 10) newPieces.push_back(make_pair(og[i].first - 1, og[i].second));
-				else if (randDirection <= 20) newPieces.push_back(make_pair(og[i].first + 1, og[i].second));
-				else if (randDirection <= 30) newPieces.push_back(make_pair(og[i].first, og[i].second-1));
-				else if (randDirection <= 40) newPieces.push_back(make_pair(og[i].first, og[i].second+1));
-				else if (randDirection <= 50) newPieces.push_back(make_pair(og[i].first - 1, og[i].second-1));
-				else if (randDirection < 60) newPieces.push_back(make_pair(og[i].first - 1, og[i].second+1));
-				else if (randDirection < 70) newPieces.push_back(make_pair(og[i].first + 1, og[i].second-1));
-				else newPieces.push_back(make_pair(og[i].first + 1, og[i].second+1));
+				randDistance = rand() % 4;
+				if (randDirection <= 10) newPieces.push_back(make_pair(og[i].first - randDistance, og[i].second));
+				else if (randDirection <= 20) newPieces.push_back(make_pair(og[i].first + randDistance, og[i].second));
+				else if (randDirection <= 30) newPieces.push_back(make_pair(og[i].first, og[i].second - randDistance));
+				else if (randDirection <= 40) newPieces.push_back(make_pair(og[i].first, og[i].second + randDistance));
+				else if (randDirection <= 50) newPieces.push_back(make_pair(og[i].first - randDistance, og[i].second - randDistance));
+				else if (randDirection < 60) newPieces.push_back(make_pair(og[i].first - randDistance, og[i].second + randDistance));
+				else if (randDirection < 70) newPieces.push_back(make_pair(og[i].first + randDistance, og[i].second - randDistance));
+				else newPieces.push_back(make_pair(og[i].first + randDistance, og[i].second + randDistance));
 			}
 			else newPieces.push_back(og[i]);
 		}
