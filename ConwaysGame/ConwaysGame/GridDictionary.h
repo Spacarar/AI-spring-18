@@ -2,6 +2,7 @@
 #include"GameEngine.h"
 #include<map>
 #include<vector>
+#include<math.h>
 
 using namespace std;
 
@@ -21,29 +22,25 @@ class GameRecord {
 	}
 	
 	//returns true if believed to be stagnant data
-	bool stagnantCheck(int lValue) {
-		int count = 0;
-		//int startingP;
-		//liveValues.size() < 5 ? startingP = 0 : startingP = liveValues.size() - 14;
-		for (int i = 0; i < 5; i++) {
-			if (lValue == liveValues[i])count++;
-		}
-		return count > 7;
+	bool stagnantCheck() {
+		return (lastAverage > 0.0 && lastAverage < .8);
 	}
 
 public:
 	vector < pair<int, int> > startCoords;
 	UpdateState lastState;
-	int liveValues[5];
 	//FIXME add a running average a=(1-p)(last a) +(p)(liveValue); p=1/99 for 99 elements
-	size_t oscillationRecord[5]; //string record of last 5 grids, kept to check for cycles
-	unsigned int currOsc; //current index to be inserted for oscillation check
-	int repeatedView; //the number of repeated grids seen
-	int deathCycle; //the cycle the pattern was determined to have "stopped"
+	//Running average elements (last lifeValue, used to calculate current Delta
+	int lastLV;
+	double lastAverage;
+
+	size_t oscillationRecord[5];
+	unsigned int currOsc;
+	unsigned int repeatedView;
+	int deathCycle;
 	GameRecord() {
 		lastState = LIVING;
 		for (int i = 0; i < 5; i++) {
-			liveValues[i] = 0;
 			oscillationRecord[i] = 0;
 		}
 		startCoords.clear();
@@ -52,12 +49,26 @@ public:
 		deathCycle = -1;
 	}
 	UpdateState update(Grid &g, int cycle) {
-		//liveValues.push_back(g.liveValue());
-		liveValues[currOsc] = g.liveValue();
+		int lifeValue = g.liveValue();
+		//average update
+		if (cycle == 0) {
+			lastLV =lifeValue;
+			lastAverage = 0.0;
+		}
+		else if(cycle==1) {
+			lastAverage = abs(lastLV - lifeValue);
+			lastLV = lifeValue;
+		}
+		else {
+			lastAverage = ((lastAverage*(cycle - 1)) + abs(lastLV - lifeValue)) / cycle;
+		}
+		//oscillation check
 		countOsc(g.me());
 		oscillationRecord[currOsc] = g.me();
 		currOsc = (currOsc + 1) % 5;
-		if (g.liveValue() == 0) {
+
+		//return values
+		if (lifeValue == 0) {
 			deathCycle = cycle;
 			lastState = DEAD;
 			return DEAD;
@@ -67,11 +78,11 @@ public:
 			deathCycle = cycle;
 			return OSCILLATING;
 		}
-		//else if (stagnantCheck(g.liveValue())) {
-			//lastState = STAGNANT;
-			//deathCycle = cycle;
-			//return STAGNANT;
-		//}
+		else if (stagnantCheck()) {
+			lastState = STAGNANT;
+			deathCycle = cycle;
+			return STAGNANT;
+		}
 		else {
 			lastState = LIVING;
 			return LIVING;
@@ -114,6 +125,7 @@ public:
 		return gridDict.count(me);
 	}
 
+	//the dictionary knows when this pattern dies off
 	bool cDeathFound(size_t me) {
 		if (gridDict.count(me) > 0) {
 			return (gridDict[me].deathCycle != -1);
@@ -134,16 +146,19 @@ public:
 			else return FAILED;
 		}
 	}
-	GameRecord record(size_t me) {
+	
+	//possibly unnecessary
+	GameRecord* record(size_t me) {
 		if (gridDict.count(me) > 0) {
-			return gridDict[me];
+			return &gridDict[me];
 		}
 		else {
 			printf("This record does not exist yet?");
-			return GameRecord();
+			return &GameRecord();
 		}
 	}
 
+	//Dictionary information things
 	int deadCount() {
 		int c = 0;
 		map<size_t, GameRecord>::const_iterator it;

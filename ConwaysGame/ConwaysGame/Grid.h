@@ -41,14 +41,18 @@ public:
 
 	}
 	Grid(int scr_width, int scr_height, int pixel_size) {
+		Uint8 r, g, b;
 		blackRect.x = 0;
 		blackRect.y = 0;
 		blackRect.w = scr_width;
 		blackRect.h = scr_height;
 		pixel_size <= 0 ? pSize = 1 : pSize = pixel_size;
 		for (int i = 0; i < GRIDSIZE; i++) {
+			r = rand() % 206 + 50;
+			g = rand() % 206 + 50;
+			b = rand() % 206 + 50;
 			for (int j = 0; j < GRIDSIZE; j++) {
-				pixel[i][j] = Pixel(i*pSize, j*pSize, pSize, false);
+				pixel[i][j] = Pixel(i*pSize, j*pSize, pSize, false, { r,g,b });
 			}
 		}
 	}

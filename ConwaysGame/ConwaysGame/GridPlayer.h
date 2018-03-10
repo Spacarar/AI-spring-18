@@ -4,16 +4,19 @@
 #include<random>
 #include<fstream>
 
-const int CLEANRUNS = 4; //number of times it will clean up dictionary
+const int CLEANRUNS = 8; //number of times it will clean up dictionary
 const int PICKRUNS = 50; //evaluations between cleanups 
+const double CUTOFF = .8;//grid dictionary average fitness % cutoff
+//to meet cleanup criteria, the grid must pass 40% the average delta of the entire dictionary
 
 
 class GridPlayer {
 	int cycles; //how far the player will check the simulation
 	int pieces; //the number of pieces the player can place
+	double lowAverage;
 	Grid grid;
 	GridDictionary gd;
-	int displayIt;
+	int displayIt; //current index to display (used in gameEngine)
 	int deadChecked;
 	int oscChecked;
 	int stagChecked;
@@ -25,6 +28,9 @@ public:
 		pieces = 1;
 		grid = Grid();
 		gd = GridDictionary();
+		lowAverage = 0;
+		displayIt = 0;
+		deadChecked = oscChecked = stagChecked = liveChecked = 0;
 	}
 	GridPlayer(int cyc, int pie) {
 		srand(unsigned int(time(NULL)));
@@ -32,29 +38,17 @@ public:
 		pieces = pie;
 		grid = Grid();
 		gd = GridDictionary();
+		lowAverage = 0;
+		displayIt = 0;
+		deadChecked = oscChecked = stagChecked = liveChecked = 0;
 	}
 	void start() {
-		// evaluate cycles
-		//While (morePatterns)
-		//	while(gd.updateState(grid.me())==LIVING){
-		//		gd.update(grid.me(),&grid);
-		//		grid.planMove();
-		//		grid.update();
-		//	}
-		//	tell user about pattern
-		//	getNextPattern()
-		//}
-		//output some stuff.
-		//D: 8021  O: 1791 S: 165 L: 23
-		//D: 8007  O : 1780 S : 169 L : 44
-		//D: 7991  O: 1808 S: 173 L: 28
-		//D: 7984  O: 1813 S: 172 L: 31
 		for (int c = 0; c < CLEANRUNS; c++) {
 			for (int i = 0; i < PICKRUNS; i++) {
-				//cout << endl << "Begin Evaluation:";
+				//randomly select for first run, then introduce new data every so often
 				if(c==0||c%4==0)pickPieces();
 				else {
-					if (rand() % 20 == 0)pickUnion();
+					if (rand() % 10 == 0)pickUnion();
 					else pickMutation();
 
 				}
@@ -69,13 +63,11 @@ public:
 						break;
 					case OSCILLATING:
 						//printf("OSCILLATION PATTERN ASSUMED %d ", gd.record(me).repeatedView);
-						//cout << "Final: " << grid.me() << " (" << i << ")\n";
 						oscChecked++;
 						i = cycles + 1;
 						break;
 					case STAGNANT:
 						//printf("STAGNANT PATTERN ASSUMED");
-						//cout << "Final: " << grid.me() << " (" << i << ")\n";
 						stagChecked++;
 						i = cycles + 1;
 						break;
@@ -88,10 +80,7 @@ public:
 						printf("Failed or unknown cycle!\n");
 					}
 					if (i == cycles-1) {
-						//cout << "Final: " << grid.me() << " (" << i << ")\n";
-						//cout << "counting living grid: " << gd.gridDict[me].lastState << ":0"<<endl;
 						liveChecked++;
-						//cin.get();
 					}
 				}
 				//printf("\n DONE EVALUATING ONE PATTERN \n");
@@ -148,11 +137,20 @@ public:
 			grid.clear();
 			for (int i = 0; i < pieces; i++) {
 				//place a piece +- i distance away
-				dX = (rand() % 3 - 1)*(rand() % (int(i/2) + 1));
-				dY = (rand() % 3 - 1)*(rand() % (int(i/2) + 1));
+				if (rand() % 2 == 0)
+					dX = rand() % (i+1);
+				else dX = (-1)*rand() % (i+1);
+				if (rand() % 2 == 0)
+					dY = rand() % (i+1);
+				else dY = (-1)*rand() % (i+1);
+
+				//dX = (rand() % 3 - 1)*(rand() % (int(i/2) + 1));
+				//dY = (rand() % 3 - 1)*(rand() % (int(i/2) + 1));
 				chosenCoords.push_back(make_pair(tX+dX, tY+dY));
 			}
 			grid.turnOnPixel(chosenCoords);
+			grid.planMove();
+			grid.update();
 		}
 	
 	}
@@ -163,8 +161,8 @@ public:
 		map<size_t, GameRecord>::iterator it1;
 		map<size_t, GameRecord>::iterator it2;
 		while (gd.exists(grid.me())) {
-			chosen1 = rand() % gd.gridDict.size();
-			chosen2 = rand() % gd.gridDict.size();
+			chosen1 = rand() % (gd.gridDict.size());
+			chosen2 = rand() %( gd.gridDict.size());
 			it1 = gd.gridDict.begin();
 			it2 = gd.gridDict.begin();
 			//cout << "picking union " << endl;
@@ -179,14 +177,14 @@ public:
 
 	}
 	void pickMutation() {
-		int chosen = rand() % gd.gridDict.size();
+		int chosen = rand() % (gd.gridDict.size());
 		grid.clear();
 		map<size_t, GameRecord>::iterator it = gd.gridDict.begin();
 		for (int i = 0; i < chosen; i++)++it;
 		int tries = 0;
 		while (gd.exists(grid.me())) {
-			if (tries > 5) {
-				cout << "mutation already found" << endl;
+			if (tries > 4) {
+				//cout << "mutation already found" << endl;
 				chosen = rand() % gd.gridDict.size();
 				it = gd.gridDict.begin();
 				for (int i = 0; i < chosen; i++)++it;
@@ -200,9 +198,17 @@ public:
 
 	void cleanupDictionary(int lowLimit) {
 		map<size_t, GameRecord>::iterator it;
-		for (it = gd.gridDict.begin(); it != gd.gridDict.end()&&gd.gridDict.size()>10; ++it) {
+		double avgSum = 0;
+		for (it = gd.gridDict.begin(); it != gd.gridDict.end(); ++it) {
+			cout << it->second.lastAverage << " ";
+			if(it->second.lastAverage!=0.0)avgSum += it->second.lastAverage;
+		}
+		lowAverage = (avgSum / gd.gridDict.size() - 1)*CUTOFF;
+		cout << "\n Low Average: " << lowAverage << endl;
+		for (it = gd.gridDict.begin(); it != gd.gridDict.end() && gd.gridDict.size()>1; ++it) {
 			//lasted too short of a period.
-			if (it->second.deathCycle>0 && it->second.deathCycle < lowLimit &&it->second.lastState!=LIVING) {
+			//if ((it->second.lastAverage<lowAverage)||(it->second.deathCycle>0 && it->second.deathCycle < lowLimit) &&(it->second.lastState!=LIVING)) {
+			if((it->second.lastAverage<lowAverage)){
 				//cout << "erasing LC: "<<it->second.deathCycle<<"  " << it->first << endl;
 				gd.gridDict.erase(it);
 				it = gd.gridDict.begin();

@@ -17,13 +17,13 @@ const int PSIZE = 7;
 const int SCR_WIDTH = PSIZE*GRIDSIZE;
 const int SCR_HEIGHT = PSIZE*GRIDSIZE;
 const int MILLIS_PER_SEC = 1000;
-const int FPS = 5;
 
 bool isRunning = true;
 
 
 class GameEngine {
 	//debugging tools
+	int FPS;
 	int totalFrames;
 	mClock::time_point sTime;
 
@@ -80,8 +80,9 @@ class GameEngine {
 public:
 	GameEngine() {
 		totalFrames = 0;
+		FPS = 5;
 		grid = Grid(SCR_WIDTH, SCR_HEIGHT, PSIZE);
-		gPlayer = GridPlayer(100, 30);
+		gPlayer = GridPlayer(200, 50);
 		sTime = mClock::now();
 		gPlayer.start();
 		printf("Time(seconds): %lld", ((std::chrono::duration_cast<std::chrono::milliseconds>(mClock::now() - sTime).count())) / 1000);
@@ -203,6 +204,40 @@ void GameEngine::handleEvent(SDL_Event e) {
 			grid.clear();
 			grid.turnOnPixel(gPlayer.nextLivingFound());
 			//grid.drawGlider(mouseX, mouseY);
+		}
+	}
+	else if (e.type == SDL_KEYDOWN) {
+		switch (e.key.keysym.sym) {
+		case SDLK_0:
+			FPS = 0;
+			break;
+			case SDLK_1:
+				FPS = 2;
+				break;
+			case SDLK_2:
+				FPS = 5;
+				break;
+			case SDLK_3:
+				FPS = 10;
+				break;
+			case SDLK_4:
+				FPS = 20;
+				break;
+			case SDLK_5:
+				FPS = 40;
+				break;
+			case SDLK_6:
+				FPS = 80;
+				break;
+			case SDLK_7:
+				FPS = 160;
+				break;
+			case SDLK_8:
+				FPS = 320;
+				break;
+			case SDLK_9:
+				FPS = 640;
+				break;
 		}
 	}
 }
