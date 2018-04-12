@@ -29,8 +29,8 @@ if __name__=='__main__':
     levelO = 0
     print("set the recursion level of the players, higher values will be slower")
     while(levelX<=0 and levelO<=0):
-        levelX=input("X recursion level: ")
-        levelO=input("O recursion Level: ")
+        levelX=int(input("X recursion level: "))
+        levelO=int(input("O recursion Level: "))
     gameplay.setAgentO(gameplay.myAgentO(levelO))
     gameplay.setAgentX(gameplay.myAgentX(levelX))
     gameplay.play()
