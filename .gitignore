@@ -132,3 +132,4 @@ ENV/
 # mypy
 .mypy_cache/
 *.suo
+/Minimizer/nbproject/private/

@@ -13,10 +13,12 @@ typedef std::chrono::steady_clock mClock;
 
 
 //using namespace std;
-const int PSIZE = 7;
+const int PSIZE = 12;
 const int SCR_WIDTH = PSIZE*GRIDSIZE;
 const int SCR_HEIGHT = PSIZE*GRIDSIZE;
 const int MILLIS_PER_SEC = 1000;
+const int MAX_CYCLE = 100;
+const int PIECES_PICKED = 20;
 
 bool isRunning = true;
 
@@ -82,10 +84,10 @@ public:
 		totalFrames = 0;
 		FPS = 5;
 		grid = Grid(SCR_WIDTH, SCR_HEIGHT, PSIZE);
-		gPlayer = GridPlayer(200, 50);
+		gPlayer = GridPlayer(MAX_CYCLE, PIECES_PICKED);
 		sTime = mClock::now();
 		gPlayer.start();
-		printf("Time(seconds): %lld", ((std::chrono::duration_cast<std::chrono::milliseconds>(mClock::now() - sTime).count())) / 1000);
+		printf("Time(seconds): %lld \n", ((std::chrono::duration_cast<std::chrono::milliseconds>(mClock::now() - sTime).count())) / 1000);
 		grid.turnOnPixel(gPlayer.nextLivingFound());
 		sTime = lUpdate = lDraw = mClock::now();
 		initSDL();

@@ -29,7 +29,10 @@ class GameRecord {
 public:
 	vector < pair<int, int> > startCoords;
 	UpdateState lastState;
-	//FIXME add a running average a=(1-p)(last a) +(p)(liveValue); p=1/99 for 99 elements
+	//the max number of living pixels that occured
+	int maxValue;
+	//the min number of living pixels that occured
+	int minValue;
 	//Running average elements (last lifeValue, used to calculate current Delta
 	int lastLV;
 	double lastAverage;
@@ -40,6 +43,8 @@ public:
 	int deathCycle;
 	GameRecord() {
 		lastState = LIVING;
+		maxValue = 0;
+		minValue =GRIDSIZE*GRIDSIZE;
 		for (int i = 0; i < 5; i++) {
 			oscillationRecord[i] = 0;
 		}
@@ -60,8 +65,19 @@ public:
 			lastLV = lifeValue;
 		}
 		else {
-			lastAverage = ((lastAverage*(cycle - 1)) + abs(lastLV - lifeValue)) / cycle;
+			lastAverage = ((lastAverage*(cycle - 1)) + abs(lastLV - lifeValue)+(cycle*.1)) / cycle;
 		}
+		//min/max update
+		if (minValue > lifeValue) {
+			//printf("min: (%d -> %d\n", minValue, lifeValue);
+			minValue = lifeValue;
+		}
+		if (maxValue < lifeValue) {
+			//printf("max:(%d->%d\n", maxValue, lifeValue);
+			maxValue = lifeValue;
+		}
+		//minValue > lifeValue ? minValue=lifeValue : minValue ;
+		//maxValue < lifeValue ? maxValue = lifeValue : maxValue;
 		//oscillation check
 		countOsc(g.me());
 		oscillationRecord[currOsc] = g.me();
@@ -92,12 +108,12 @@ public:
 
 class GridDictionary {
 private:
-	unsigned int check_interval;
+	//unsigned int check_interval;
 	/*
 	GameRecord is meant to store the # of living things on screen in a vector (index=cycle number/interval)
 	deathcycle is the cycle in which no blocks are living or have become stagnant
 	updates will be handled based on return type
-	living updates will be allowed to continue (until limited by recursion)
+	living updates will be allowed to continue (until limited by depth parameter)
 	other updates will break free to start new pattern (gridplayer will be handling the starting pattern)
 	*/
 
@@ -105,7 +121,7 @@ private:
 public:
 	map<size_t, GameRecord> gridDict;
 	GridDictionary(int interval=1) {
-		interval > 0 ? check_interval = interval : check_interval = 1;
+		//interval > 0 ? check_interval = interval : check_interval = 1;
 		gridDict.clear();
 		Grid emptyG = Grid();
 		update(emptyG.me(), emptyG,0);
@@ -120,7 +136,8 @@ public:
 		}
 		
 	}
-
+	
+	//returns true if pattern is in dictionary
 	bool exists(size_t me) {
 		return gridDict.count(me);
 	}

@@ -13,19 +13,22 @@
 
 #include "Pixel.h"
 
-const int GRIDSIZE = 100;
+const int GRIDSIZE = 30;
 
 using namespace std;
 class Grid {
 private:
-	SDL_Rect blackRect;
+	SDL_Rect blackRect; //the background black-screen
 	Pixel pixel[GRIDSIZE][GRIDSIZE];
+	
 	//returns an assured safe range (used to loop around grid edges)
 	int safeN(int n) {
 		if (n < 0)return(GRIDSIZE - ((abs(n)) % GRIDSIZE));
 		else return n%GRIDSIZE;
 	}
-	int pSize;
+
+	int pSize;//size of one 'pixel'
+
 public:
 	Grid() {
 		blackRect.h = 0;
@@ -40,19 +43,23 @@ public:
 		}
 
 	}
+
 	Grid(int scr_width, int scr_height, int pixel_size) {
-		Uint8 r, g, b;
+		Uint8 r, g, b; //currently set to be shades of blue-purple
 		blackRect.x = 0;
 		blackRect.y = 0;
 		blackRect.w = scr_width;
 		blackRect.h = scr_height;
+		b = 255;
 		pixel_size <= 0 ? pSize = 1 : pSize = pixel_size;
+		
+		//put the pixels where they belong
 		for (int i = 0; i < GRIDSIZE; i++) {
 			r = rand() % 206 + 50;
-			g = rand() % 206 + 50;
-			b = rand() % 206 + 50;
+			g = rand() % r + 50;
 			for (int j = 0; j < GRIDSIZE; j++) {
-				pixel[i][j] = Pixel(i*pSize, j*pSize, pSize, false, { r,g,b });
+				pixel[i][j] = Pixel(i*pSize, j*pSize, pSize, false);
+				//pixel[i][j] = Pixel(i*pSize, j*pSize, pSize, false, { r,g,b });
 			}
 		}
 	}
@@ -79,6 +86,7 @@ public:
 		}
 	}
 
+	//specialized function to draw a glider at the real pixel location of the mouse
 	void drawGlider(int offX, int offY) {
 		offX = (offX) % (GRIDSIZE*pSize);
 		offY = (offY) % (GRIDSIZE*pSize);
@@ -89,6 +97,7 @@ public:
 		turnOnPixel(offX + 2, offY + 2);
 	}
 
+	//one step to determine whether or not the pixels survive
 	void planMove() {
 		int me = 0;
 		int ee = 0;
@@ -109,7 +118,7 @@ public:
 			}
 		}
 	}
-
+	//and one step to actually make the change to the pixels
 	void update() {
 		int me = 0;
 		int ee = 0;
@@ -133,6 +142,7 @@ public:
 		return ee;
 	}
 
+	//uses a hash value of the grid to store into the dictionary
 	size_t me() {
 		static std::string representation = "";
 		std::hash<string> hashThis;
@@ -150,6 +160,7 @@ public:
 		//}
 		return hashThis(representation);
 	}
+	
 	bool isEmpty() {
 		for (int x = 0; x < GRIDSIZE; x++) {
 			for(int y=0;y<GRIDSIZE;y++){
@@ -158,6 +169,8 @@ public:
 		}
 		return true;
 	}
+	
+	//counts the living pixels on the board
 	int liveValue() {
 		int count = 0;
 		for (int x = 0; x < GRIDSIZE; x++) {
@@ -170,6 +183,7 @@ public:
 		}
 		return count;
 	}
+	
 	void clear() {
 		for (int x = 0; x < GRIDSIZE; x++) {
 			for (int y = 0; y < GRIDSIZE; y++) {
@@ -178,6 +192,8 @@ public:
 			}
 		}
 	}
+	
+	//returns the coordinates of all living pixels as a vector
 	vector<pair<int, int> > getCoords() {
 		vector<pair<int, int> > coords;
 		for (int x = 0; x < GRIDSIZE; x++) {
@@ -188,6 +204,7 @@ public:
 		return coords;
 	}
 
+	//a test used to ensure safeN was working how I intended
 	void testSafeN() {
 		for (int i = -4; i < GRIDSIZE + 5; i++) {
 			printf("%d=%d", i, safeN(i));
