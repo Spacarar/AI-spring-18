@@ -4,9 +4,9 @@
 #include<random>
 #include<fstream>
 
-const int CLEANRUNS = 20; //number of times it will clean up dictionary
+const int CLEANRUNS = 50; //number of times it will clean up dictionary
 const int PICKRUNS = 50; //new evaluations tried between cleanups
-const double CUTOFF = 0.5;//grid dictionary average fitness % cutoff (cutoff*(average of dictionary) anything less is thrown out)
+const double CUTOFF = 0.8;//grid dictionary average fitness % cutoff (cutoff*(average of dictionary) anything less is thrown out)
 //to meet cleanup criteria, the grid must pass (cutoff*(average of dictionary) the average delta of the entire dictionary
 
 
@@ -69,8 +69,10 @@ class GridPlayer {
 			it1 = gd.gridDict.begin();
 			it2 = gd.gridDict.begin();
 			//cout << "picking union " << endl;
-			for (int i = 0; i < chosen1; i++)++it1;
-			for (int i = 0; i < chosen2; i++)++it2;
+			for (int i = 0; i < chosen1&&it1 != gd.gridDict.end(); i++)++it1;
+			for (int i = 0; i < chosen2&&it2 != gd.gridDict.end(); i++)++it2;
+			if (it1 == gd.gridDict.end())return dPickPieces();
+			if (it2 == gd.gridDict.end())return dPickPieces();
 			chosenCoords.insert(chosenCoords.end(), it1->second.startCoords.begin(), it1->second.startCoords.end());
 			chosenCoords.insert(chosenCoords.end(), it2->second.startCoords.begin(), it2->second.startCoords.end());
 			grid.clear();
@@ -86,7 +88,8 @@ class GridPlayer {
 		int chosen = rand() % (gd.gridDict.size()); //the board it will mutate over
 		grid.clear();
 		map<size_t, GameRecord>::iterator it = gd.gridDict.begin();
-		for (int i = 0; i < chosen; i++)++it;
+		for (int i = 0; i < chosen&&it!=gd.gridDict.end(); i++)++it;
+		if (it == gd.gridDict.end())return dPickPieces();
 		int tries = 0;
 		while (gd.exists(grid.me())) {
 			if (tries > 4) {
@@ -99,6 +102,80 @@ class GridPlayer {
 			grid.clear();
 			grid.turnOnPixel(mutation(it->second.startCoords));
 			tries++;
+		}
+	}
+
+	void verticalMesh() {
+		grid.clear();
+		int chosen1;
+		int chosen2;
+		map<size_t, GameRecord>::iterator it1;
+		map<size_t, GameRecord>::iterator it2;
+		vector<pair<int, int> > chosenCoords;
+		while (gd.exists(grid.me())) {
+			chosenCoords.clear();
+			chosen1 = rand() % (gd.gridDict.size());
+			chosen2 = rand() % (gd.gridDict.size());
+			it1 = gd.gridDict.begin();
+			it2 = gd.gridDict.begin();
+			//cout << "picking union " << endl;
+			for (int i = 0; i < chosen1&&it1!=gd.gridDict.end(); i++)++it1;
+			for (int i = 0; i < chosen2&&it2 != gd.gridDict.end(); i++)++it2;
+			if (it1 == gd.gridDict.end())return dPickPieces();
+			if (it2 == gd.gridDict.end())return dPickPieces();
+			Grid g1;
+			Grid g2;
+			g1.turnOnPixel(it1->second.startCoords);
+			g2.turnOnPixel(it2->second.startCoords);
+			for (int y = 0; y < GRIDSIZE; y++) {
+				for (int x = 0; x < GRIDSIZE; x++) {
+					if (x % 2 == 0) {
+						if (g1.isAlive(x, y))chosenCoords.push_back(make_pair(x, y));
+					}
+					else {
+						if (g2.isAlive(x, y))chosenCoords.push_back(make_pair(x, y));
+					}
+				}
+			}
+			grid.turnOnPixel(chosenCoords);
+			grid.planMove();
+			grid.update();
+		}
+	}
+	void horizontalMesh() {
+		grid.clear();
+		int chosen1;
+		int chosen2;
+		map<size_t, GameRecord>::iterator it1;
+		map<size_t, GameRecord>::iterator it2;
+		vector<pair<int, int> > chosenCoords;
+		while (gd.exists(grid.me())) {
+			chosenCoords.clear();
+			chosen1 = rand() % (gd.gridDict.size());
+			chosen2 = rand() % (gd.gridDict.size());
+			it1 = gd.gridDict.begin();
+			it2 = gd.gridDict.begin();
+			for (int i = 0; i < chosen1&&it1 != gd.gridDict.end(); i++)++it1;
+			for (int i = 0; i < chosen2&&it2 != gd.gridDict.end(); i++)++it2;
+			if (it1 == gd.gridDict.end())return dPickPieces();
+			if (it2 == gd.gridDict.end())return dPickPieces();
+			Grid g1;
+			Grid g2;
+			g1.turnOnPixel(it1->second.startCoords);
+			g2.turnOnPixel(it2->second.startCoords);
+			for (int y = 0; y < GRIDSIZE; y++) {
+				for (int x = 0; x < GRIDSIZE; x++) {
+					if (y % 2 == 0) {
+						if (g1.isAlive(x, y))chosenCoords.push_back(make_pair(x, y));
+					}
+					else {
+						if (g2.isAlive(x, y))chosenCoords.push_back(make_pair(x, y));
+					}
+				}
+			}
+			grid.turnOnPixel(chosenCoords);
+			grid.planMove();
+			grid.update();
 		}
 	}
 
@@ -141,7 +218,7 @@ class GridPlayer {
 		}
 
 	}
-	
+
 	//returns a muated version of the original grid provided.
 	vector<pair<int, int> >  mutation(vector<pair<int, int> > og) {
 		int randDirection = 0;
@@ -170,6 +247,7 @@ class GridPlayer {
 	}
 
 public:
+	/*
 	GridPlayer() {
 		srand(unsigned int(time(NULL)));
 		cycles = 10;
@@ -180,7 +258,8 @@ public:
 		displayIt = 0;
 		deadChecked = oscChecked = stagChecked = liveChecked = 0;
 	}
-	GridPlayer(int cyc, int pie) {
+	*/
+	GridPlayer(int cyc=0, int pie=0) {
 		srand(unsigned int(time(NULL)));
 		cycles = cyc;
 		pieces = pie;
@@ -190,22 +269,55 @@ public:
 		displayIt = 0;
 		deadChecked = oscChecked = stagChecked = liveChecked = 0;
 	}
-	
+
 	//runs through the pickruns*cleanruns and then sets the display iterator to 0
 	void start() {
+		string origin = "random";
+		size_t me = 1;
+		size_t prevMe = 1;
 		for (int c = 0; c < CLEANRUNS; c++) {
 			for (int i = 0; i < PICKRUNS; i++) {
 				//randomly select for first run, then introduce new data every so often
-				if(c==0)pickPieces();
-				else if (c % 8 == 0)dPickPieces();
-				else {
-					if (rand() % 8 == 0)pickUnion();
-					else pickMutation();
-
-				}
-				size_t me = grid.me();
-				for (int i = 0; i < cycles; i++) {
-					gd.update(me, grid, i);
+					if (c == 0) {
+						pickPieces();
+					}
+					else {
+						int choice = rand() % 5;
+						if (gd.gridDict.size() < 2)choice = 0;
+						switch (choice) {
+						case 0:
+							//cout << "dpick" << endl;
+							dPickPieces();
+							origin = "random";
+							break;
+						case 1:
+							//cout << "union" << endl;
+							pickUnion();
+							origin = "union";
+							break;
+						case 2:
+							//cout << "mutation" << endl;
+							pickMutation();
+							origin = "mutation";
+							break;
+						case 3:
+							//cout << "vmesh" << endl;
+							verticalMesh();
+							origin = "vmesh";
+							break;
+						case 4:
+							//cout << "hmesh" << endl;
+							horizontalMesh();
+							origin = "hmesh";
+							break;
+						}
+					}
+					me = grid.me();
+				if(me==prevMe)cout << prevMe << " &&  " << me << endl;
+				prevMe = me;
+				//evaluate futures
+				for (int f = 0; f < cycles; f++) {
+					gd.update(me, grid, f, origin);
 					switch (gd.stateOf(me)) {
 					case LIVING:
 						//printf("%d working...\n", i);
@@ -215,22 +327,22 @@ public:
 					case OSCILLATING:
 						//printf("OSCILLATION PATTERN ASSUMED %d ", gd.record(me).repeatedView);
 						oscChecked++;
-						i = cycles + 1;
+						f = cycles + 1;
 						break;
 					case STAGNANT:
 						//printf("STAGNANT PATTERN ASSUMED");
 						stagChecked++;
-						i = cycles + 1;
+						f = cycles + 1;
 						break;
 					case DEAD:
 						//printf("All life has died at cycle:%d", gd.record(me).deathCycle);
 						deadChecked++;
-						i = cycles + 1;
+						f = cycles + 1;
 						break;
 					default:
 						printf("Failed or unknown cycle!\n");
 					}
-					if (i == cycles-1) {
+					if (f == cycles - 1) {
 						liveChecked++;
 					}
 				}
@@ -238,40 +350,51 @@ public:
 			}
 			//cout << "D: " << deadChecked << "  O: " << oscChecked << " S: " << stagChecked << " L: " << liveChecked << endl;
 			//printf("Final Count: %d  D:%d  O:%d  S:%d  L:%d\n", gd.totalCount(), gd.deadCount(), gd.oscCount(), gd.stagCount(), gd.liveCount());
-			cout << "Cleaning ("<<c+1<<"): " << gd.gridDict.size();
-			cleanupDictionary(c+1);
-			cout << " Now: " << gd.gridDict.size() << endl;
+			//cout << "Cleaning (" << c + 1 << "): " << gd.gridDict.size();
+			cleanupDictionary(c + 1);
+			//cout << " Now: " << gd.gridDict.size() << endl;
 			printf("Final Count: %d  D:%d  O:%d  S:%d  L:%d\n", gd.totalCount(), gd.deadCount(), gd.oscCount(), gd.stagCount(), gd.liveCount());
 		}
-		//cout << "D: " << deadChecked << "  O: " << oscChecked << " S: " << stagChecked << " L: " << liveChecked << endl;
-		//printf("Final Count: %d  D:%d  O:%d  S:%d  L:%d\n", gd.totalCount(), gd.deadCount(), gd.oscCount(), gd.stagCount(), gd.liveCount());
-		exportLiving();
 		displayIt = 0;
 	}
-	
-	vector<pair<int, int> > nextLivingFound() {
+
+	vector<pair<int, int> > nextFound() {
 		int c = 0;
-		int looped = 0;
-		while (looped<3) {
+		while (true) {
 			c = 0;
 			for (map<size_t, GameRecord>::iterator it = gd.gridDict.begin(); it != gd.gridDict.end(); ++it) {
-				//if (it->second.lastState == LIVING) {
-					if (displayIt < c) {
-						displayIt = c;
-						printf("{L,D,O,S}: %d", it->second.lastState);
-						printf("min: %d max: %d \n", it->second.minValue, it->second.maxValue);
-						return it->second.startCoords;
-					}
-				//}
+				if (displayIt < c) {
+					displayIt = c;
+					printf("Display #: %d \n", displayIt);
+					printf("{L,D,O,S}: %d  %s  ", it->second.lastState, it->second.origin.c_str());
+					printf("min: %d max: %d \n", it->second.minValue, it->second.maxValue);
+					return it->second.startCoords;
+				}
 				c++;
 			}
-			looped++;
 			displayIt = 0;
 		}
-		vector<pair<int, int>> none;
-		return none;
 	}
-	
+	vector<pair<int, int> > previousFound() {
+		size_t c = gd.gridDict.size();
+		while (true) {
+			c = gd.gridDict.size();
+			for (map<size_t, GameRecord>::iterator it = gd.gridDict.end(); it != gd.gridDict.begin(); --it) {
+				//cout << displayIt << endl;
+				if (displayIt > c) {
+					displayIt = c;
+					printf("Display #: %d \n", displayIt);
+					printf("{L,D,O,S}: %d  %s  ", it->second.lastState, it->second.origin.c_str());
+					printf("min: %d max: %d \n", it->second.minValue, it->second.maxValue);
+					return it->second.startCoords;
+				}
+				c--;
+			}
+			displayIt = gd.gridDict.size();
+		}
+
+	}
+
 	//exports the coordinates from grids that survived. less useful than expected.
 	void exportLiving() {
 		map<size_t, GameRecord>::iterator it;
@@ -287,27 +410,26 @@ public:
 		}
 		fout.close();
 	}
-	
 	//throws out any grids that did not meet cutoff criteria.
 	void cleanupDictionary(int lowLimit) {
 		map<size_t, GameRecord>::iterator it;
 		double avgSum = 0;
 		for (it = gd.gridDict.begin(); it != gd.gridDict.end(); ++it) {
 			//cout << it->second.lastAverage << " ";
-			if(it->second.lastAverage!=0.0)avgSum += it->second.lastAverage;
+			if (it->second.lastAverage != 0.0)avgSum += it->second.lastAverage;
 		}
 		lowAverage = (avgSum / gd.gridDict.size() - 1)*CUTOFF;
 		cout << "\n Low Average: " << lowAverage << endl;
-		for (it = gd.gridDict.begin(); it != gd.gridDict.end() && gd.gridDict.size()>1; ++it) {
+		for (it = gd.gridDict.begin(); it != gd.gridDict.end() && gd.gridDict.size() > 1; ++it) {
 			//lasted too short of a period.
 			//if ((it->second.lastAverage<lowAverage)||(it->second.deathCycle>0 && it->second.deathCycle < lowLimit) &&(it->second.lastState!=LIVING)) {
-			if((it->second.lastAverage<lowAverage)){
+			if ((it->second.lastAverage < lowAverage)) {
 				//cout << "erasing LC: "<<it->second.deathCycle<<"  " << it->first << endl;
 				gd.gridDict.erase(it);
 				it = gd.gridDict.begin();
 			}
 		}
 	}
-	
-	
+
+
 };

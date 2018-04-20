@@ -18,7 +18,9 @@ int main(int argc, char* argv[]){
 	//player.start();
 	g->run();
 	cout << "\n end of run\n";
+	g->quit();
 	cin.get();
+	delete g;
 	return 0;
 
 

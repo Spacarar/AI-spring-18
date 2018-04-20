@@ -13,7 +13,7 @@
 
 #include "Pixel.h"
 
-const int GRIDSIZE = 30;
+const int GRIDSIZE = 25;
 
 using namespace std;
 class Grid {
@@ -63,7 +63,9 @@ public:
 			}
 		}
 	}
-	
+	~Grid() {
+		//delete pixel;
+	}
 	void drawGrid(SDL_Renderer *ren) {
 		SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
 		SDL_RenderFillRect(ren, &blackRect);
@@ -81,6 +83,7 @@ public:
 		pixel[safeN(x)][safeN(y)].update();
 	}
 	void turnOnPixel(std::vector<std::pair<int, int>> cordList) {
+		if (cordList.size() < 2||&cordList==nullptr)return;
 		for (int i = 0; i < cordList.size(); i++) {
 			turnOnPixel(cordList[i].first, cordList[i].second);
 		}
@@ -158,6 +161,8 @@ public:
 		//for (int i = 0; i > representation.size(); i++) {
 			//rp[i] = representation[i];
 		//}
+		//cout << representation << endl;
+		//cout << hashThis(representation) << endl;
 		return hashThis(representation);
 	}
 	
@@ -203,7 +208,18 @@ public:
 		}
 		return coords;
 	}
+	bool isAlive(int x, int y) {
+		return pixel[x][y].isAlive();
+	}
 
+	bool operator==(Grid g) {
+		for (int x = 0; x < GRIDSIZE; x++) {
+			for (int y = 0; y < GRIDSIZE; y++) {
+				if (pixel[x][y].isAlive() && !g.pixel[x][y].isAlive())return false;
+			}
+		}
+		return true;
+	}
 	//a test used to ensure safeN was working how I intended
 	void testSafeN() {
 		for (int i = -4; i < GRIDSIZE + 5; i++) {

@@ -17,7 +17,7 @@ const int PSIZE = 12;
 const int SCR_WIDTH = PSIZE*GRIDSIZE;
 const int SCR_HEIGHT = PSIZE*GRIDSIZE;
 const int MILLIS_PER_SEC = 1000;
-const int MAX_CYCLE = 100;
+const int MAX_CYCLE = 500;
 const int PIECES_PICKED = 20;
 
 bool isRunning = true;
@@ -30,6 +30,7 @@ class GameEngine {
 	mClock::time_point sTime;
 
 	SDL_Thread *updateThread, *drawThread;
+	//SDL_Thread *searchThread;//set gridplayer to search in background for things FIXME
 	//SDL STUFF
 	SDL_Window *gwindow;
 	SDL_Renderer *ren;
@@ -76,7 +77,6 @@ class GameEngine {
 	bool drawRequired();
 	void handleEvent(SDL_Event e);
 	void draw();
-	void quit();
 
 
 public:
@@ -86,14 +86,17 @@ public:
 		grid = Grid(SCR_WIDTH, SCR_HEIGHT, PSIZE);
 		gPlayer = GridPlayer(MAX_CYCLE, PIECES_PICKED);
 		sTime = mClock::now();
+
 		gPlayer.start();
 		printf("Time(seconds): %lld \n", ((std::chrono::duration_cast<std::chrono::milliseconds>(mClock::now() - sTime).count())) / 1000);
-		grid.turnOnPixel(gPlayer.nextLivingFound());
+		grid.turnOnPixel(gPlayer.nextFound());
 		sTime = lUpdate = lDraw = mClock::now();
 		initSDL();
 	}
 
 	void run();
+	void quit();
+
 };
 
 void GameEngine::init() {
@@ -202,9 +205,13 @@ void GameEngine::handleEvent(SDL_Event e) {
 	static int mouseY;
 	if (e.type == SDL_MOUSEBUTTONDOWN) {
 		SDL_GetMouseState(&mouseX, &mouseY);
+		if (e.button.button == SDL_BUTTON_LEFT) {
+			grid.clear();
+			grid.turnOnPixel(gPlayer.previousFound());
+		}
 		if (e.button.button == SDL_BUTTON_RIGHT) {
 			grid.clear();
-			grid.turnOnPixel(gPlayer.nextLivingFound());
+			grid.turnOnPixel(gPlayer.nextFound());
 			//grid.drawGlider(mouseX, mouseY);
 		}
 	}

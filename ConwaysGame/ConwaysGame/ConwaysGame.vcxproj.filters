@@ -55,4 +55,9 @@
     <Library Include="..\..\..\..\..\..\..\Programs\SDL\SDL2-2.0.7\lib\x64\SDL2.lib" />
     <Library Include="..\..\..\..\..\..\..\Programs\SDL\SDL2-2.0.7\lib\x64\SDL2main.lib" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="testSheet.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
