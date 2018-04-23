@@ -1,5 +1,4 @@
 #pragma once
-#include"GameEngine.h"
 #include"GridDictionary.h"
 #include<random>
 #include<fstream>
@@ -17,6 +16,7 @@ class GridPlayer {
 	Grid grid;
 	GridDictionary gd;
 	int displayIt; //current index to display (used in gameEngine)
+	bool KeepSearching;
 
 	//number of each type the GridPlayer has evaluated so far
 	int deadChecked;
@@ -247,18 +247,6 @@ class GridPlayer {
 	}
 
 public:
-	/*
-	GridPlayer() {
-		srand(unsigned int(time(NULL)));
-		cycles = 10;
-		pieces = 1;
-		grid = Grid();
-		gd = GridDictionary();
-		lowAverage = 0;
-		displayIt = 0;
-		deadChecked = oscChecked = stagChecked = liveChecked = 0;
-	}
-	*/
 	GridPlayer(int cyc=0, int pie=0) {
 		srand(unsigned int(time(NULL)));
 		cycles = cyc;
@@ -268,6 +256,7 @@ public:
 		lowAverage = 0;
 		displayIt = 0;
 		deadChecked = oscChecked = stagChecked = liveChecked = 0;
+		KeepSearching = true;
 	}
 
 	//runs through the pickruns*cleanruns and then sets the display iterator to 0
@@ -275,8 +264,14 @@ public:
 		string origin = "random";
 		size_t me = 1;
 		size_t prevMe = 1;
-		for (int c = 0; c < CLEANRUNS; c++) {
+		int c = 0;
+		//for (int c = 0; c < CLEANRUNS; c++) {
+		while (KeepSearching){
 			for (int i = 0; i < PICKRUNS; i++) {
+				if (KeepSearching == false) {
+					i = PICKRUNS;
+					break;
+				}
 				//randomly select for first run, then introduce new data every so often
 					if (c == 0) {
 						pickPieces();
@@ -350,14 +345,16 @@ public:
 			}
 			//cout << "D: " << deadChecked << "  O: " << oscChecked << " S: " << stagChecked << " L: " << liveChecked << endl;
 			//printf("Final Count: %d  D:%d  O:%d  S:%d  L:%d\n", gd.totalCount(), gd.deadCount(), gd.oscCount(), gd.stagCount(), gd.liveCount());
-			//cout << "Cleaning (" << c + 1 << "): " << gd.gridDict.size();
+			cout << "Cleaning (" << c + 1 << "): " << gd.gridDict.size();
 			cleanupDictionary(c + 1);
 			//cout << " Now: " << gd.gridDict.size() << endl;
 			printf("Final Count: %d  D:%d  O:%d  S:%d  L:%d\n", gd.totalCount(), gd.deadCount(), gd.oscCount(), gd.stagCount(), gd.liveCount());
+			c++;
 		}
-		displayIt = 0;
 	}
-
+	void halt() {
+		KeepSearching = false;
+	}
 	vector<pair<int, int> > nextFound() {
 		int c = 0;
 		while (true) {
@@ -366,7 +363,7 @@ public:
 				if (displayIt < c) {
 					displayIt = c;
 					printf("Display #: %d \n", displayIt);
-					printf("{L,D,O,S}: %d  %s  ", it->second.lastState, it->second.origin.c_str());
+					printf("{L,D,O,S}: %s  %s  ", gd.stateString(it->second.lastState).c_str(), it->second.origin.c_str());
 					printf("min: %d max: %d \n", it->second.minValue, it->second.maxValue);
 					return it->second.startCoords;
 				}

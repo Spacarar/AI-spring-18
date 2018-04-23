@@ -8,8 +8,6 @@
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
 #include "GameEngine.h"
-#include"GridDictionary.h"
-#include"GridPlayer.h"
 
 
 int main(int argc, char* argv[]){

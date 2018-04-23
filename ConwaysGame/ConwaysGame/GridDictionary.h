@@ -1,5 +1,5 @@
 #pragma once
-#include"GameEngine.h"
+#include"Grid.h"
 #include<map>
 #include<vector>
 #include<fstream>
@@ -8,13 +8,14 @@
 using namespace std;
 
 typedef enum UpdateState { LIVING, DEAD, OSCILLATING, STAGNANT, FAILED } UpdateState;
+const int OSCDEPTH = 10;
 
 class GameRecord {
 
 	//count the repititions in the oscillating string array
 	void countOsc(size_t me) {
 		repeatedView = 0;
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < OSCDEPTH; i++) {
 			if (me == oscillationRecord[i]) {
 				//cout << me << "==" << oscillationRecord[i] << endl;
 				repeatedView++;
@@ -39,7 +40,7 @@ public:
 	int lastLV;
 	double lastAverage;
 
-	size_t oscillationRecord[5];
+	size_t oscillationRecord[OSCDEPTH];
 	unsigned int currOsc;
 	unsigned int repeatedView;
 	int deathCycle;
@@ -76,7 +77,7 @@ public:
 		//oscillation check
 		countOsc(g.me());
 		oscillationRecord[currOsc] = g.me();
-		currOsc = (currOsc + 1) % 5;
+		currOsc = (currOsc + 1) % OSCDEPTH;
 
 		//return values
 		if (lifeValue == 0) {
@@ -136,7 +137,7 @@ public:
 
 	//returns true if pattern is in dictionary
 	bool exists(size_t me) {
-		return gridDict.count(me);
+		return gridDict.find(me)!=gridDict.end();
 	}
 
 	//the dictionary knows when this pattern dies off
@@ -219,5 +220,18 @@ public:
 		}
 		return c;
 	}
-
+	string stateString(int st) {
+		switch (st) {
+		case LIVING:
+			return "Living";
+		case DEAD:
+			return "Dead";
+		case OSCILLATING:
+			return "Oscillating";
+		case STAGNANT:
+			return "Stagnant";
+		default:
+			return "FAILED";
+		}
+	}
 };
