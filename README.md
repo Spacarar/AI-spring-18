@@ -3,10 +3,9 @@
 repository for AI class, spring 2018
 
 #### TicTacToe source code direct link
-    -https://github.com/Spacarar/AI-spring-18/tree/TicTacToe/TicTacToe/TicTacToe
-
+[TicTacToe](https://github.com/Spacarar/AI-spring-18/tree/TicTacToe/TicTacToe/TicTacToe)
 #### Conways Game source code direct link
-    -https://github.com/Spacarar/AI-spring-18/tree/TicTacToe/ConwaysGame/ConwaysGame
+[Conways Game](https://github.com/Spacarar/AI-spring-18/tree/TicTacToe/ConwaysGame/ConwaysGame)
  
 ###### Conways Game Exit Note:
 
