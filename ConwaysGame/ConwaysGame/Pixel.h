@@ -14,34 +14,13 @@ private:
 	SDL_Color color; //make it more interesting
 	SDL_Rect rect;
 public:
-	Pixel(int _x = 0, int _y = 0, int _size = 4, bool alive = false, SDL_Color c = { 200, 255, 255 }) {
-		rect.x = _x;
-		rect.y = _y;
-		rect.h = _size;
-		rect.w = _size;
-		status = alive;
-		syncStatus = status;
-		color = c;
-	}
+	Pixel(int _x = 0, int _y = 0, int _size = 4, bool alive = false, SDL_Color c = { 200, 255, 255 });
 
-	void live() {
-		syncStatus = true;
-	}
-	void kill() {
-		syncStatus = false;
-	}
-	void born() {
-		syncStatus = true;
-	}
-	void update() {
-		status = syncStatus;
-	}
-	void drawMe(SDL_Renderer *ren) {
-		SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, 255);
-		SDL_RenderFillRect(ren, &rect);
-	}
-	bool isAlive() {
-		return status;
-	}
+	void live();
+	void kill();
+	void born();
+	void update();
+	void drawMe(SDL_Renderer *ren);
+	bool isAlive();
 
 };

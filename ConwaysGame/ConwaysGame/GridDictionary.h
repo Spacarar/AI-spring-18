@@ -104,7 +104,6 @@ public:
 
 class GridDictionary {
 private:
-	//unsigned int check_interval;
 	/*
 	GameRecord is meant to store the # of living things on screen in a vector (index=cycle number/interval)
 	deathcycle is the cycle in which no blocks are living or have become stagnant
@@ -116,122 +115,26 @@ private:
 
 public:
 	map<size_t, GameRecord> gridDict;
-	GridDictionary() {
-		gridDict.clear();
-		Grid emptyG = Grid();
-		update(emptyG.me(), emptyG, 0,"empty");
-	}
-	~GridDictionary() {
-		gridDict.clear();
-	}
-	UpdateState stateOf(size_t me) {
-		if (gridDict.count(me) > 0) {
-			return gridDict[me].lastState;
-		}
-		else {
-			printf("I DONT EXIST YET!\n");
-			return FAILED;
-		}
-
-	}
+	GridDictionary();
+	~GridDictionary();
+	UpdateState stateOf(size_t me);
 
 	//returns true if pattern is in dictionary
-	bool exists(size_t me) {
-		return gridDict.find(me)!=gridDict.end();
-	}
+	bool exists(size_t me);
 
 	//the dictionary knows when this pattern dies off
-	bool cDeathFound(size_t me) {
-		if (gridDict.count(me) > 0) {
-			return (gridDict[me].deathCycle != -1);
-		}
-		return false;
-	}
+	bool cDeathFound(size_t me);
 
-	UpdateState update(size_t me, Grid &g, int cycle, string origin) {
-		static int numAdded = 1;
-		if (gridDict.count(me) > 0) {
-			gridDict[me].origin = origin;
-			return gridDict[me].update(g, cycle);
-		}
-		else {
-			/*
-			if (gridDict.size() != numAdded&&origin!="empty") {
-				cout << origin << "  " << me << endl;
-				cout << gridDict.size() << "VS" << numAdded<< endl;
-				cout << "ERROR OCCURED HERE!!!!!!" << endl;
-				cin.get();
-				cin.get();
-			}
-			cout << "adding new " << numAdded << endl;
-			if (origin != "empty")numAdded++;
-			*/
-			gridDict.insert(make_pair(me, GameRecord()));
-			gridDict[me].startCoords = g.getCoords();
-			gridDict[me].origin = origin;
-			return update(me, g, cycle,origin);
-		}
-	}
+	UpdateState update(size_t me, Grid &g, int cycle, string origin);
 
 	//possibly unnecessary
-	GameRecord* record(size_t me) {
-		if (gridDict.count(me) > 0) {
-			return &gridDict[me];
-		}
-		else {
-			printf("This record does not exist yet?");
-			return &GameRecord();
-		}
-	}
+	GameRecord* record(size_t me);
 
 	//Dictionary information things
-	int deadCount() {
-		int c = 0;
-		map<size_t, GameRecord>::const_iterator it;
-		for (it = gridDict.begin(); it != gridDict.end(); ++it) {
-			if (it->second.lastState == DEAD)c++;
-		}
-		return c;
-	}
-	int liveCount() {
-		int c = 0;
-		map<size_t, GameRecord>::const_iterator it;
-		for (it = gridDict.begin(); it != gridDict.end(); ++it) {
-			if (it->second.lastState == LIVING)c++;
-		}
-		return c;
-	}
-	int totalCount() {
-		return int(gridDict.size());
-	}
-	int oscCount() {
-		int c = 0;
-		map<size_t, GameRecord>::const_iterator it;
-		for (it = gridDict.begin(); it != gridDict.end(); ++it) {
-			if (it->second.lastState == OSCILLATING)c++;
-		}
-		return c;
-	}
-	int stagCount() {
-		int c = 0;
-		map<size_t, GameRecord>::const_iterator it;
-		for (it = gridDict.begin(); it != gridDict.end(); ++it) {
-			if (it->second.lastState == STAGNANT)c++;
-		}
-		return c;
-	}
-	string stateString(int st) {
-		switch (st) {
-		case LIVING:
-			return "Living";
-		case DEAD:
-			return "Dead";
-		case OSCILLATING:
-			return "Oscillating";
-		case STAGNANT:
-			return "Stagnant";
-		default:
-			return "FAILED";
-		}
-	}
+	int deadCount();
+	int liveCount();
+	int totalCount();
+	int oscCount();
+	int stagCount();
+	string stateString(int st);
 };

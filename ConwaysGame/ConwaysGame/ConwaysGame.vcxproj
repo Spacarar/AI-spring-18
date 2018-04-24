@@ -172,14 +172,15 @@
   <ItemGroup>
     <ClCompile Include="ConwaysGame.cpp" />
     <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="GridDictionary.cpp" />
+    <ClCompile Include="GridPlayer.cpp" />
+    <ClCompile Include="Pixel.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\..\..\..\..\..\Programs\SDL\SDL2-2.0.7\lib\x64\SDL2.lib" />
     <Library Include="..\..\..\..\..\..\..\Programs\SDL\SDL2-2.0.7\lib\x64\SDL2main.lib" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="testSheet.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
