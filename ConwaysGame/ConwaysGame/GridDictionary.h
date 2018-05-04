@@ -8,7 +8,7 @@
 using namespace std;
 
 typedef enum UpdateState { LIVING, DEAD, OSCILLATING, STAGNANT, FAILED } UpdateState;
-const int OSCDEPTH = 10;
+const int OSCDEPTH = 3;
 
 class GameRecord {
 
@@ -128,7 +128,7 @@ public:
 	UpdateState update(size_t me, Grid &g, int cycle, string origin);
 
 	//possibly unnecessary
-	GameRecord* record(size_t me);
+	//GameRecord* record(size_t me);
 
 	//Dictionary information things
 	int deadCount();

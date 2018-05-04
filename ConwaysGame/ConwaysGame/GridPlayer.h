@@ -15,7 +15,7 @@ class GridPlayer {
 	double lowAverage; //the current cutoff number
 	Grid grid;
 	GridDictionary gd;
-	int displayIt; //current index to display (used in gameEngine)
+	size_t displayIt; //current index to display (used in gameEngine)
 	bool KeepSearching;
 
 	//number of each type the GridPlayer has evaluated so far
@@ -41,6 +41,9 @@ class GridPlayer {
 
 	//returns a muated version of the original grid provided.
 	vector<pair<int, int> >  mutation(vector<pair<int, int> > og);
+	//flips second and first of pair and returns the inverse. (rotates the grid)
+	//used at random when taking a union or mesh operation
+	vector<pair<int, int> > rotateGrid(vector<pair<int, int> > og);
 
 public:
 	GridPlayer(int cyc = 0, int pie = 0);
@@ -55,6 +58,8 @@ public:
 	void exportLiving();
 	//throws out any grids that did not meet cutoff criteria.
 	void cleanupDictionary(int lowLimit);
+
+	void lookupSimilarity();
 
 
 };

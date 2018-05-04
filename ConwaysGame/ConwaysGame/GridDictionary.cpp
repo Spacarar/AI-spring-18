@@ -45,6 +45,7 @@ UpdateState GridDictionary::update(size_t me, Grid &g, int cycle, string origin)
 	}
 }
 
+/*
 GameRecord* GridDictionary::record(size_t me) {
 	if (gridDict.count(me) > 0) {
 		return &gridDict[me];
@@ -54,6 +55,7 @@ GameRecord* GridDictionary::record(size_t me) {
 		return &GameRecord();
 	}
 }
+*/
 
 int GridDictionary::deadCount() {
 	int c = 0;

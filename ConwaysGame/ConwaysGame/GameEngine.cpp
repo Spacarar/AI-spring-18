@@ -1,27 +1,20 @@
 #include"stdafx.h"
 #include "GameEngine.h"
+
 GameEngine::GameEngine() {
+	init();
+	initSDL();
+}
+
+void GameEngine::init() {
 	totalFrames = 0;
 	FPS = 5;
 	grid = Grid(SCR_WIDTH, SCR_HEIGHT, PSIZE);
 	gPlayer = GridPlayer(MAX_CYCLE, PIECES_PICKED);
 	sTime = mClock::now();
 	isRunning = true;
-	//gPlayer.start();
-	//printf("Time(seconds): %lld \n", ((std::chrono::duration_cast<std::chrono::milliseconds>(mClock::now() - sTime).count())) / 1000);
-	//grid.turnOnPixel(gPlayer.nextFound());
 	sTime = lUpdate = lDraw = mClock::now();
-	initSDL();
-}
-
-void GameEngine::init() {
-	initSDL();
-	grid = Grid(SCR_WIDTH, SCR_HEIGHT, PSIZE);
-	grid.turnOnPixel(1, 1);
-	grid.turnOnPixel(1, 2);
-	grid.turnOnPixel(1, 3);
-	sTime = lUpdate = lDraw = mClock::now();
-	//printf("init called");
+	gameState = MAINMENU;
 }
 void GameEngine::initSDL() {
 	if ((SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1)) {
