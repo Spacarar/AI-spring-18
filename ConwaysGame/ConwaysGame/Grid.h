@@ -13,7 +13,7 @@
 
 #include "Pixel.h"
 
-const int GRIDSIZE = 100;
+const int GRIDSIZE = 80;
 
 using namespace std;
 class Grid {

@@ -428,25 +428,25 @@ void GridPlayer::lookupSimilarity() {
 			grid.turnOnPixel(check->second.startCoords);
 			for (int c = 0; c < 5; c++) {
 				if (values[c] == grid.liveValue() || values[(c + 1) % 5] == grid.liveValue() || values[(c + 2) % 5] == grid.liveValue()) {
-					cout << values[c] << ",";
+					//cout << values[c] << ",";
 					similarityCount++;
 				}
 				grid.planMove();
 				grid.update();
 			}
 			if (similarityCount >= 3) {
-				cout << "guessing at similar grids\n";
-				cout << "origin";
-				for (int j = 0; j < origin->second.startCoords.size(); j++) {
-					cout << " (" << origin->second.startCoords[j].first << ',' << origin->second.startCoords[j].second << ") ";
-				}
-				cout << endl;
+				//cout << "guessing at similar grids\n";
+				//cout << "origin";
+				//for (int j = 0; j < origin->second.startCoords.size(); j++) {
+					//cout << " (" << origin->second.startCoords[j].first << ',' << origin->second.startCoords[j].second << ") ";
+				//}
+				//cout << endl;
 				//cin.get();
-				cout << "check";
-				for (int j = 0; j < check->second.startCoords.size(); j++) {
-					cout << " (" << check->second.startCoords[j].first << ',' << check->second.startCoords[j].second << ") ";
-				}
-				cout << endl;
+				//cout << "check";
+				//for (int j = 0; j < check->second.startCoords.size(); j++) {
+					//cout << " (" << check->second.startCoords[j].first << ',' << check->second.startCoords[j].second << ") ";
+				//}
+				//cout << endl;
 				//cin.get();
 				gd.gridDict.erase(check);
 				check = origin;

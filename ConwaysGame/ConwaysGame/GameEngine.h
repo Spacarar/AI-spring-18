@@ -12,7 +12,7 @@ typedef enum GameState { MAINMENU, SEARCHING, FREEPLAY, EXIT } GameState;
 
 
 //using namespace std;
-const int PSIZE = 7;
+const int PSIZE = 8;
 const int SCR_WIDTH = PSIZE*GRIDSIZE;
 const int SCR_HEIGHT = PSIZE*GRIDSIZE;
 const int MILLIS_PER_SEC = 1000;

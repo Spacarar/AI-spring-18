@@ -6,7 +6,6 @@
 #include <SDL_ttf.h>
 
 
-//CLASSES (WILL BE MOVED SOON)
 class Pixel {
 private:
 	bool status;

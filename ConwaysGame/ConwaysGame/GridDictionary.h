@@ -8,7 +8,7 @@
 using namespace std;
 
 typedef enum UpdateState { LIVING, DEAD, OSCILLATING, STAGNANT, FAILED } UpdateState;
-const int OSCDEPTH = 3;
+const int OSCDEPTH = 5;
 
 class GameRecord {
 
